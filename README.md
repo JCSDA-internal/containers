@@ -3,7 +3,7 @@ Contains tools for building and distributing the JEDI/JCSDA CharlieCloud contain
 
 Docker is required to build Charliecloud images from this repository, but it is not required to run them.
 
-To build a Charliecloud container, first edit the Dockerfile to choose the base docker image you wish to build from (if it does not exist locally then docker will search for them on Docker hub and pull them.
+To build a Charliecloud container, first edit the Dockerfile to choose the base docker image you wish to build from (if it does not exist locally then docker will search for it on Docker hub and pull it).
 
 When you are happy with the Dockerfile, you can then build the image as a tar file as follows (from the directory where the Dockerfile is:
 
