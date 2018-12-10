@@ -11,13 +11,9 @@ When you are happy with the Dockerfile, you can then build the image as a tar fi
     
 You will be prompted whether or not you'd like to make this available on Amazon S3.  If you answer :code:`y` then others will be able to access the container as follows:
 
-.. code:: bash
-
     wget http://data.jcsda.org/charliecloud/ch-jedi-latest.tar.gz
     
 TO use the container, enter, e.g.
- 
-.. code:: bash
  
      mkdir -p ~/ch-jedi
      cd ~/ch-jedi
