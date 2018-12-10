@@ -9,25 +9,17 @@ When you are happy with the Dockerfile, you can then build the image as a tar fi
 
 .. code:: bash
    
-    ch-build -t ch-jedi-latest ~/charliecloud
-    mkdir containers
-    ch-docker2tar ch-jedi-latest containers
+    ./build_container ch-jedi-latest
     
-If desired, you can make this available on Amazon S3 with 
-
-.. code:: bash
-
-    aws s3 cp containers/ch-jedi-latest.tar.gz s3://data.jcsda.org/charliecloud/ch-jedi-latest.tar.gz
-
-Others can retrieve it from there as follows:
+You will be prompted whether or not you'd like to make this available on Amazon S3.  If you answer :code:`y` then others will be able to access the container as follows:
 
 .. code:: bash
 
     wget http://data.jcsda.org/charliecloud/ch-jedi-latest.tar.gz
     
- Then unpack the tar file with
+TO use the container, enter, e.g.
  
- .. code:: bash
+.. code:: bash
  
      mkdir -p ~/ch-jedi
      cd ~/ch-jedi
