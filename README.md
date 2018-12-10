@@ -7,8 +7,6 @@ To build a Charliecloud container, first edit the Dockerfile to choose the base 
 
 When you are happy with the Dockerfile, you can then build the image as a tar file as follows (from the directory where the Dockerfile is:
 
-.. code:: bash
-   
     ./build_container ch-jedi-latest
     
 You will be prompted whether or not you'd like to make this available on Amazon S3.  If you answer :code:`y` then others will be able to access the container as follows:
