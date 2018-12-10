@@ -5,29 +5,17 @@ Docker is required to build Charliecloud images from this repository, but it is 
 
 To build a Charliecloud container, first edit the Dockerfile to choose the base docker image you wish to build from (if it does not exist locally then docker will search for it on Docker hub and pull it).
 
-When you are happy with the Dockerfile, you can then build the image as a tar file as follows (from the directory where the Dockerfile is:
+When you are happy with the Dockerfile, you can then build the image as a tar file by entering:
 
-.. code:: bash
-   
-    ch-build -t ch-jedi-latest ~/charliecloud
-    mkdir containers
-    ch-docker2tar ch-jedi-latest containers
+    ./build_container ch-jedi-latest
+
+The container file will be placed in a subdirectory called `containers`
     
-If desired, you can make this available on Amazon S3 with 
-
-.. code:: bash
-
-    aws s3 cp containers/ch-jedi-latest.tar.gz s3://data.jcsda.org/charliecloud/ch-jedi-latest.tar.gz
-
-Others can retrieve it from there as follows:
-
-.. code:: bash
+You will be prompted whether or not you'd like to make this available on Amazon S3.  If you answer `y` then others will be able to access the container as follows:
 
     wget http://data.jcsda.org/charliecloud/ch-jedi-latest.tar.gz
     
- Then unpack the tar file with
- 
- .. code:: bash
+To use the container, enter, e.g.
  
      mkdir -p ~/ch-jedi
      cd ~/ch-jedi
