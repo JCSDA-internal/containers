@@ -9,7 +9,7 @@ When you are happy with the Dockerfile, you can then build the image as a tar fi
 
 .. code:: bash
    
-    ch-build -t ch-jedi-odb ~/charliecloud
+    ch-build -t ch-jedi-latest ~/charliecloud
     mkdir containers
     ch-docker2tar ch-jedi-latest containers
     
@@ -17,7 +17,7 @@ If desired, you can make this available on Amazon S3 with
 
 .. code:: bash
 
-    aws s3 cp containers/ch-jedi-odb.tar.gz s3://data.jcsda.org/charliecloud/ch-jedi-latest.tar.gz
+    aws s3 cp containers/ch-jedi-latest.tar.gz s3://data.jcsda.org/charliecloud/ch-jedi-latest.tar.gz
 
 Others can retrieve it from there as follows:
 
