@@ -2,6 +2,13 @@
 # Charliecloud project
 # https://hpc.github.io/charliecloud
 #
+# This will build a Vagrant virtual machine that is provisioned to
+# run both Charliecloud and Singularity 3.0.  This should allow you
+# to pull the JEDI image of your choice, enter the container,
+# build, and run JEDI as described in the JEDI Docs.
+#
+# ==================================================================
+# Comments from Charliecloud team
 # This Vagrantfile builds a Centos 7 virtual machine with Charliecloud and
 # Singularity installed. 
 
@@ -26,6 +33,8 @@
 #    the complexity of finding the right version to match the Charliecloud
 #    examples, while the cost is low: a few tests are skipped. Users who want
 #    to run single-node MPI apps in the VM should launch from within ch-run.
+# ==================================================================
+
 
 Vagrant.require_version ">= 2.1.3"
 Vagrant.configure("2") do |c|
