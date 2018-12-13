@@ -43,13 +43,19 @@ Vagrant.configure("2") do |c|
   c.vm.box_version = "~>1809"   # updates: https://blog.centos.org/?s=vagrant
   c.vm.box_check_update = true  # warn if base box out of date
 
-  c.vm.hostname = "charliebox"
+  c.vm.hostname = "jedibox"
   c.vagrant.plugins = ['vagrant-disksize',
                        'vagrant-proxyconf',
                        'vagrant-reload',
                        'vagrant-vbguest']
 
-  # Note: Vagrant sets up a port mapping from localhost:2222 to charliebox:22
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  c.vm.synced_folder "vagrant_data", "/home/vagrant/vagrant_data"
+
+  # Note: Vagrant sets up a port mapping from localhost:2222 to jedibox:22
   # automatically, so we need no repeat that here.
 
   # Set up proxies if appropriate.
@@ -68,7 +74,7 @@ Vagrant.configure("2") do |c|
 
   # Configure the appliance.
   c.vm.provider "virtualbox" do |vb|
-    vb.name = "charliebox"
+    vb.name = "jedibox"
     vb.gui = false
     vb.memory = "4096"
     vb.cpus = 6
