@@ -205,6 +205,7 @@ EOF2
     echo 'export GOPATH=${HOME}/go' >> ~/.bashrc
     echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc
     source ~/.bashrc
+    rm -f go$VERSION.$OS-$ARCH.tar.gz
 
     # build and install Singularity
     mkdir -p $GOPATH/src/github.com/sylabs
