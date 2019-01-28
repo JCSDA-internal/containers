@@ -92,13 +92,14 @@ Vagrant.configure("2") do |config|
                    wget
 
     # Git from IUS. This also activates EPEL.
-    wget https://centos7.iuscommunity.org/ius-release.rpm
-    yum -y install epel-release
-    rpm --install ius-release.rpm
-    yum -y install git2u
+    #wget https://centos7.iuscommunity.org/ius-release.rpm
+    #yum -y install epel-release
+    #rpm --install ius-release.rpm
+    #yum -y install git2u
+    yum -y install git
 
     # Utilities to make the shell scripts faster and more usable.
-    yum -y install pigz pv
+    #yum -y install pigz pv
 
     # Add /usr/local/{bin,sbin} to $PATH.
     echo 'export PATH=/usr/local/sbin:/usr/local/bin:$PATH' > /etc/profile.d/path.sh
@@ -121,20 +122,20 @@ Vagrant.configure("2") do |config|
   #      convince parted to accept "yes" to the warning even without a TTY.
   #      See: https://unix.stackexchange.com/a/365657
   #
-  config.vm.provision "disksize", type: "shell", privileged: true,
-                 inline: <<-EOF
-    set -e
-    cd /tmp
-
-    yum -y install e2fsprogs
-    wget -nv https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/23/Everything/x86_64/os/Packages/p/parted-3.2-11.fc23.x86_64.rpm
-    rpm --upgrade parted-*.x86_64.rpm
-
-    parted /dev/sda ---pretend-input-tty resizepart 1 yes 100%
-    parted /dev/sda p
-    resize2fs /dev/sda1
-    df -h
-  EOF
+  #config.vm.provision "disksize", type: "shell", privileged: true,
+  #               inline: <<-EOF
+  #  set -e
+  #  cd /tmp
+  #
+  #  yum -y install e2fsprogs
+  #  wget -nv https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/23/Everything/x86_64/os/Packages/p/parted-3.2-11.fc23.x86_64.rpm
+  #  rpm --upgrade parted-*.x86_64.rpm
+  #
+  #  parted /dev/sda ---pretend-input-tty resizepart 1 yes 100%
+  #  parted /dev/sda p
+  #  resize2fs /dev/sda1
+  #  df -h
+  #EOF
 
   # Configure namespaces. This needs a reboot for the kernel command line
   # update to take effect.
