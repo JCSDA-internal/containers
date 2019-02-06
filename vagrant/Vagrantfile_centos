@@ -191,17 +191,17 @@ EOF2
   EOF
 
   # Install Singularity
-  config.vm.provision "singularity", type: "shell", privileged: true,
+  config.vm.provision "singularity", type: "shell", privileged: false,
                       inline: <<-EOF
     set -e
 
     # package dependencies
-    yum install -y openssl-devel libuuid-devel
+    sudo yum install -y openssl-devel libuuid-devel
 
     # install Go
     export VERSION=1.11.2 OS=linux ARCH=amd64
     wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz
-    tar -C /usr/local -xzf go$VERSION.$OS-$ARCH.tar.gz
+    sudo tar -C /usr/local -xzf go$VERSION.$OS-$ARCH.tar.gz
     echo 'export GOPATH=${HOME}/go' >> ~/.bashrc
     echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc
     source ~/.bashrc
@@ -216,7 +216,7 @@ EOF2
     cd $GOPATH/src/github.com/sylabs/singularity
     ./mconfig
     make -C builddir
-    make -C builddir install
+    sudo make -C builddir install
 
   EOF
 
