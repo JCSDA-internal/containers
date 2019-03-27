@@ -29,7 +29,7 @@ while [[ $ans != y ]] && [[ $ans != n ]]; do
 done
 if [[ $ans == y ]] ; then
   echo "Sending to Amazon S3" 
-  aws s3 cp containers/${CH_NAME}.tar.gz s3://data.jcsda.org/charliecloud/${CH_NAME}.tar.gz
+  aws s3 cp containers/${CH_NAME}.tar.gz s3://data.jcsda.org/containers/${CH_NAME}.tar.gz
 else
   echo "Not sending to Amazon S3" 
 fi
