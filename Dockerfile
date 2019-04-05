@@ -2,6 +2,22 @@
 FROM jcsda/docker:latest
 LABEL maintainer "Mark Miesch <miesch@ucar.edu>"
 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
 RUN apt-get update 
 
-ENV FC=mpifort
+# Add mount point for work directory 
+# this is done in the Docker image but needs to be re-done here
+RUN mkdir /worktmp
+
+# Charliecloud does not modify the environment variables.  So, to set 
+# environment variables we need to put them in an initialization script
+RUN echo 'export NETCDF=/usr/local' >> /etc/bash.bashrc
+RUN echo 'export PNETCDF=/usr/local' >> /etc/bash.bashrc
+RUN echo 'export PIO=/usr/local' >> /etc/bash.bashrc
+RUN echo 'export BOOST_ROOT=/usr/local' >> /etc/bash.bashrc
+RUN echo 'export EIGEN3_INCLUDE_DIR=/usr/local' >> /etc/bash.bashrc
+RUN echo 'export LAPACK_PATH=/usr/local' >> /etc/bash.bashrc
+RUN echo 'export LAPACK_DIR=$LAPACK_PATH' >> /etc/bash.bashrc
+RUN echo 'export LAPACK_LIBRARIES="$LAPACK_PATH/lib/liblapack.a;$LAPACK_PATH/lib/libblas.a"' >> /etc/bash.bashrc
+RUN echo 'export PYTHONPATH=/usr/local/lib/python2.7/site-packages' >> /etc/bash.bashrc
+RUN echo 'export FC=mpifort' >> /etc/bash.bashrc
