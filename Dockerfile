@@ -7,7 +7,7 @@ RUN apt-get update
 
 # Add mount point for work directory 
 # this is done in the Docker image but needs to be re-done here
-RUN mkdir /worktmp
+RUN mkdir -p /worktmp
 
 # Charliecloud does not modify the environment variables.  So, to set 
 # environment variables we need to put them in an initialization script
