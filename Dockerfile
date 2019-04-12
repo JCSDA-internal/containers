@@ -7,6 +7,7 @@ RUN apt-get update
 
 # Charliecloud does not modify the environment variables.  So, to set 
 # environment variables we need to put them in an initialization script
+RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /etc/bash.bashrc
 RUN echo 'export NETCDF=/usr/local' >> /etc/bash.bashrc
 RUN echo 'export PNETCDF=/usr/local' >> /etc/bash.bashrc
 RUN echo 'export PIO=/usr/local' >> /etc/bash.bashrc
