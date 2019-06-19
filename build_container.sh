@@ -15,7 +15,7 @@ CH_NAME=$1
 
 echo "Building Charliecloud container " ${CH_NAME}
 
-ch-build -t ${CH_NAME} $HOME/charliecloud
+ch-build -t ${CH_NAME} $HOME/charliecloud --pull
 mkdir -p containers
 ch-docker2tar ${CH_NAME} containers
 
