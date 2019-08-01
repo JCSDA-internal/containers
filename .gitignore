@@ -3,3 +3,6 @@
 containers/
 vagrant/vagrant_data/
 vagrant/.vagrant
+intel_license/
+intel_tarballs/
+Dockerfile.intel-impi-dev

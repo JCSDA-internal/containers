@@ -21,3 +21,17 @@ To use the container, enter, e.g.
      cd ~/ch-jedi
      ch-tar2dir <path-to-tarfile>/ch-jedi-latest.tar.gz .
      ch-run ch-jedi-latest -- bash
+
+## Intel Containers
+
+The intel containers are handled a bit differently than the gnu containers because of licensing issues.  First you have to put the license file into the intel_license.  This is not included in the git repository because it is proprietary but it will be included in the development charliecloud container (intel-impi-dev), along with the compilers and mpi library.  
+
+So, **Do not push the Charliecloud container to a public repository**
+
+For this reason, the Charliecloud container is generated directly from the Dockerfile.  This is different from the gnu containers that are generated from public docker images hosted on Docker Hub.  To generate the container as a gzipped tar file, enter:
+
+    ch-build -t intel-impi-dev <ch-path>/charliecloud
+    mkdir -p containers
+    ch-docker2tar intel-impi-dev containers
+    
+where <ch-path> is the path to your charliecloud install directory.
