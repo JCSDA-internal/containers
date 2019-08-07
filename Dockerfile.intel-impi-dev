@@ -1,0 +1,157 @@
+FROM ubuntu:16.04 AS stage0
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bc \
+        bison \
+        build-essential \
+        csh \
+        curl \
+        file \
+        flex \
+        ksh \
+        less \
+        libcurl4-openssl-dev \
+        libexpat1-dev \
+        libgtk2.0-common \
+        libncurses-dev \
+        libssl-dev \
+        libx11-dev \
+        libxml2-dev \
+        man-db \
+        nano \
+        openssh-server \
+        screen \
+        software-properties-common \
+        swig \
+        tcl \
+        tcsh \
+        tk \
+        unzip \
+        wget \
+        wish && \
+    rm -rf /var/lib/apt/lists/*
+
+# Mellanox OFED version 4.5-1.0.1.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libnl-3-200 \
+        libnl-route-3-200 \
+        libnuma1 \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://content.mellanox.com/ofed/MLNX_OFED-4.5-1.0.1.0/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64.tgz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64.tgz -C /var/tmp -z && \
+    dpkg --install /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libibverbs1_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libibverbs-dev_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/ibverbs-utils_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libibmad_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libibmad-devel_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libibumad_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libibumad-devel_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libmlx4-1_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libmlx4-dev_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libmlx5-1_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/libmlx5-dev_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/librdmacm-dev_*_amd64.deb /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64/DEBS/librdmacm1_*_amd64.deb && \
+    rm -rf /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64.tgz /var/tmp/MLNX_OFED_LINUX-4.5-1.0.1.0-ubuntu16.04-x86_64
+
+# Intel Parallel Studio XE
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential \
+        cpio && \
+    rm -rf /var/lib/apt/lists/*
+COPY intel_tarballs/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1.tgz
+COPY intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
+RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2017_update1.tgz -C /var/tmp -z && \
+    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=DEFAULTS/g' \
+        -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
+        -e 's/^#\?\(ACCEPT_EULA\)=.*/\1=accept/g' \
+        -e 's/^#\?\(ACTIVATION_TYPE\)=.*/\1=license_file/g' \
+        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2017_update1/silent.cfg && \
+    cd /var/tmp/parallel_studio_xe_2017_update1 && ./install.sh --silent=silent.cfg && \
+    rm -rf /var/tmp/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1
+RUN echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
+
+# CMake version 3.13.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://cmake.org/files/v3.13/cmake-3.13.0-Linux-x86_64.sh && \
+    /bin/sh /var/tmp/cmake-3.13.0-Linux-x86_64.sh --prefix=/usr/local --skip-license && \
+    rm -rf /var/tmp/cmake-3.13.0-Linux-x86_64.sh
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        doxygen \
+        emacs \
+        git \
+        git-flow \
+        graphviz \
+        lynx \
+        nedit \
+        texinfo \
+        texlive-latex-recommended \
+        vim && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN add-apt-repository ppa:git-core/ppa && \
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends git-lfs && \
+    git lfs install
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python-dev \
+        python-pip \
+        python-scipy \
+        python-yaml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-dev \
+        python3-pip \
+        python3-scipy \
+        python3-yaml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata locales && \
+    ln -fs /usr/share/zoneinfo/America/Denver /etc/localtime && \
+    locale-gen --purge en_US.UTF-8 && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale "LANG=en_US.UTF-8" && \
+    update-locale "LANGUAGE=en_US:en"
+
+ENV BOOST_ROOT=/usr/local \
+    CC=mpiicc \
+    CXX=mpiicpc \
+    EIGEN3_INCLUDE_DIR=/usr/local \
+    FC=mpiifort \
+    HDF5_ROOT=/usr/local \
+    MPI_CC=mpiicc \
+    MPI_CXX=mpiicpc \
+    MPI_FC=mpiifort \
+    NETCDF=/usr/local \
+    NETCDF_ROOT=/usr/local \
+    PIO=/usr/local \
+    PNETCDF=/usr/local \
+    SERIAL_CC=icc \
+    SERIAL_CXX=icpc \
+    SERIAL_FC=ifort
+
+RUN cd /root && \
+    git clone https://github.com/jcsda/jedi-stack.git && \
+    cd jedi-stack/buildscripts && \
+    git checkout feature/container-intel-dev && \
+    ./build_stack.sh "container-intel-impi-dev" && \
+    rm -rf /root/jedi-stack && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir /worktmp
+
+RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
+    echo "export FC=mpifort" >> ~jedi/.bashrc && \
+    echo "export CC=mpicc" >> ~jedi/.bashrc && \
+    echo "export CXX=mpicxx" >> ~jedi/.bashrc && \
+    echo "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
+    mkdir ~jedi/.openmpi && \
+    echo "rmaps_base_oversubscribe = 1" >> ~jedi/.openmpi/mca-params.conf && \
+    chown -R jedi:jedi ~jedi/.gitconfig ~jedi/.openmpi
+
+ENTRYPOINT ["/bin/bash", "-l"]
+
+
