@@ -85,13 +85,14 @@ Stage0 += shell(commands=['cd /root',
     'mkdir /worktmp'])
 
 #Make a non-root user:jedi / group:jedi for running MPI
-#Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi',
-#    'echo "export FC=mpiifort" >> ~jedi/.bashrc',
-#    'echo "export CC=mpiicc" >> ~jedi/.bashrc',
-#    'echo "export CXX=mpiicpc" >> ~jedi/.bashrc',
-#    'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
-#    'mkdir ~jedi/.openmpi',
-#    'echo "rmaps_base_oversubscribe = 1" >> ~jedi/.openmpi/mca-params.conf',
-#    'chown -R jedi:jedi ~jedi/.gitconfig ~jedi/.openmpi'])
+# also set FC, CC, and CXX enfironment variables for all users
+Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi',
+    'echo "export FC=mpiifort" >> /etc/bash.bashrc',
+    'echo "export CC=mpiicc" >> /etc/bash.bashrc',
+    'echo "export CXX=mpiicpc" >> /etc/bash.bashrc',
+    'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
+    'mkdir ~jedi/.openmpi',
+    'echo "rmaps_base_oversubscribe = 1" >> ~jedi/.openmpi/mca-params.conf',
+    'chown -R jedi:jedi ~jedi/.gitconfig ~jedi/.openmpi'])
 
 Stage0 += runscript(commands=['/bin/bash -l'])

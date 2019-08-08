@@ -144,9 +144,9 @@ RUN cd /root && \
     mkdir /worktmp
 
 RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
-    echo "export FC=mpifort" >> ~jedi/.bashrc && \
-    echo "export CC=mpicc" >> ~jedi/.bashrc && \
-    echo "export CXX=mpicxx" >> ~jedi/.bashrc && \
+    echo "export FC=mpiifort" >> /etc/bash.bashrc && \
+    echo "export CC=mpiicc" >> /etc/bash.bashrc && \
+    echo "export CXX=mpiicpc" >> /etc/bash.bashrc && \
     echo "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
     mkdir ~jedi/.openmpi && \
     echo "rmaps_base_oversubscribe = 1" >> ~jedi/.openmpi/mca-params.conf && \
