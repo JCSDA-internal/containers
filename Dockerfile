@@ -1,1 +1,1 @@
-Dockerfile.intel-impi-dev
+Dockerfile.gnu-openmpi-dev
