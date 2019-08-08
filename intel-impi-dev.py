@@ -85,11 +85,14 @@ Stage0 += shell(commands=['cd /root',
     'mkdir /worktmp'])
 
 #Make a non-root user:jedi / group:jedi for running MPI
-# also set FC, CC, and CXX enfironment variables for all users
+# also set FC, CC, and CXX environment variables and paths for all users
 Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi',
     'echo "export FC=mpiifort" >> /etc/bash.bashrc',
     'echo "export CC=mpiicc" >> /etc/bash.bashrc',
     'echo "export CXX=mpiicpc" >> /etc/bash.bashrc',
+    'echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc',
+    'echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
     'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
     'mkdir ~jedi/.openmpi',
     'echo "rmaps_base_oversubscribe = 1" >> ~jedi/.openmpi/mca-params.conf',
