@@ -1,0 +1,146 @@
+FROM ubuntu:16.04 AS stage0
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bc \
+        bison \
+        build-essential \
+        csh \
+        curl \
+        file \
+        flex \
+        ksh \
+        less \
+        libcurl4-openssl-dev \
+        libexpat1-dev \
+        libgtk2.0-common \
+        libncurses-dev \
+        libssl-dev \
+        libx11-dev \
+        libxml2-dev \
+        man-db \
+        nano \
+        openssh-server \
+        screen \
+        software-properties-common \
+        swig \
+        tcl \
+        tcsh \
+        tk \
+        unzip \
+        wget \
+        wish && \
+    rm -rf /var/lib/apt/lists/*
+
+# Intel Parallel Studio XE
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential \
+        cpio && \
+    rm -rf /var/lib/apt/lists/*
+COPY intel_tarballs/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1.tgz
+COPY intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
+RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2017_update1.tgz -C /var/tmp -z && \
+    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc-l-all__x86_64;intel-ifort-l-ps__x86_64;intel-mkl__x86_64;intel-mkl-rt__x86_64;intel-mkl-ps-rt-jp__x86_64;intel-mkl-ps-cluster-64bit__x86_64;intel-mkl-ps-cluster-rt__x86_64;intel-mkl-ps-common-64bit__x86_64;intel-mkl-common-c-64bit__x86_64;intel-mkl-gnu__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-ps-common-f-64bit__x86_64;intel-mkl-ps-gnu-f-rt__x86_64;intel-mkl-ps-gnu-f__x86_64;intel-mkl-ps-f__x86_64;intel-mpirt-l-ps-wrapper__x86_64;intel-mpi-rt-core__x86_64;intel-mpi-sdk-core__x86_64;intel-mpi-doc__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-ccompxe__noarch;intel-fcompxe__noarch/g' \
+        -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
+        -e 's/^#\?\(ACCEPT_EULA\)=.*/\1=accept/g' \
+        -e 's/^#\?\(ACTIVATION_TYPE\)=.*/\1=license_file/g' \
+        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2017_update1/silent.cfg && \
+    cd /var/tmp/parallel_studio_xe_2017_update1 && ./install.sh --silent=silent.cfg && \
+    rm -rf /var/tmp/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1
+RUN echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
+
+# CMake version 3.13.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://cmake.org/files/v3.13/cmake-3.13.0-Linux-x86_64.sh && \
+    /bin/sh /var/tmp/cmake-3.13.0-Linux-x86_64.sh --prefix=/usr/local --skip-license && \
+    rm -rf /var/tmp/cmake-3.13.0-Linux-x86_64.sh
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        doxygen \
+        emacs \
+        git \
+        git-flow \
+        graphviz \
+        lynx \
+        nedit \
+        texinfo \
+        texlive-latex-recommended \
+        vim && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN add-apt-repository ppa:git-core/ppa && \
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends git-lfs && \
+    git lfs install
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python-dev \
+        python-pip \
+        python-scipy \
+        python-yaml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-dev \
+        python3-pip \
+        python3-scipy \
+        python3-yaml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata locales && \
+    ln -fs /usr/share/zoneinfo/America/Denver /etc/localtime && \
+    locale-gen --purge en_US.UTF-8 && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale "LANG=en_US.UTF-8" && \
+    update-locale "LANGUAGE=en_US:en"
+
+ENV BOOST_ROOT=/usr/local \
+    CC=mpiicc \
+    CXX=mpiicpc \
+    EIGEN3_INCLUDE_DIR=/usr/local \
+    FC=mpiifort \
+    HDF5_ROOT=/usr/local \
+    MPI_CC=mpiicc \
+    MPI_CXX=mpiicpc \
+    MPI_FC=mpiifort \
+    NETCDF=/usr/local \
+    NETCDF_ROOT=/usr/local \
+    PIO=/usr/local \
+    PNETCDF=/usr/local \
+    SERIAL_CC=icc \
+    SERIAL_CXX=icpc \
+    SERIAL_FC=ifort
+
+RUN cd /root && \
+    git clone https://github.com/jcsda/jedi-stack.git && \
+    cd jedi-stack/buildscripts && \
+    git checkout feature/container-intel-dev && \
+    ./build_stack.sh "container-intel-impi-dev" && \
+    rm -rf /root/jedi-stack && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir /worktmp
+
+RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
+    echo "export FC=mpiifort" >> /etc/bash.bashrc && \
+    echo "export CC=mpiicc" >> /etc/bash.bashrc && \
+    echo "export CXX=mpiicpc" >> /etc/bash.bashrc && \
+    echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc && \
+    echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc && \
+    echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc && \
+    echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc && \
+    echo "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
+    chown -R jedi:jedi ~jedi/.gitconfig
+
+ENTRYPOINT ["/bin/bash", "-l"]
+
+
