@@ -30,8 +30,8 @@ So, **Do not push the Charliecloud container to a public repository**
 
 For this reason, the Charliecloud container is generated directly from the Dockerfile.  This is different from the gnu containers that are generated from public docker images hosted on Docker Hub.  To generate the container as a gzipped tar file, enter:
 
-    ch-build -t intel-impi-dev <ch-path>/charliecloud
+    ch-build -t jedi-intel-impi-dev .
     mkdir -p containers
-    ch-docker2tar intel-impi-dev containers
+    ch-builder2tar jedi-intel-impi-dev containers
     
-where <ch-path> is the path to your charliecloud install directory.
+This works if you have docker installed.  Charliecloud will find this and use it as the default builder.  The latest version of Charliecloud in principle the capability to generate containers without docker but we have not yet gotten this to work with the JEDI containers.

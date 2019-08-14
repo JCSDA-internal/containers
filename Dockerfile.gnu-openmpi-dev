@@ -18,3 +18,5 @@ RUN echo 'export LAPACK_DIR=$LAPACK_PATH' >> /etc/bash.bashrc
 RUN echo 'export LAPACK_LIBRARIES="$LAPACK_PATH/lib/liblapack.a;$LAPACK_PATH/lib/libblas.a"' >> /etc/bash.bashrc
 RUN echo 'export PYTHONPATH=/usr/local/lib/python2.7/site-packages' >> /etc/bash.bashrc
 RUN echo 'export FC=mpifort' >> /etc/bash.bashrc
+RUN echo 'export CC=mpicc' >> /etc/bash.bashrc
+RUN echo 'export CXX=mpicxx' >> /etc/bash.bashrc

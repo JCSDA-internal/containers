@@ -1,1 +1,1 @@
-Dockerfile.intel-impi-devred
+Dockerfile.intel-impi-dev
