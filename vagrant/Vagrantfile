@@ -74,7 +74,7 @@ Vagrant.configure("2") do |config|
   #   vb.gui = true
   #
      # Customize the name of your VM:
-     vb.name = "jediboxtest"    
+     vb.name = "jedibox"    
 
      # Customize the amount of memory on the VM:
      vb.memory = "12288"
