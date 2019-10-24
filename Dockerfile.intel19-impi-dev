@@ -1,0 +1,96 @@
+FROM ubuntu:18.04 AS stage0
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bc \
+        bison \
+        build-essential \
+        csh \
+        curl \
+        file \
+        flex \
+        git \
+        ksh \
+        less \
+        libasound2 \
+        libcurl4-openssl-dev \
+        libexpat1-dev \
+        libgtk2.0-common \
+        libncurses-dev \
+        libpango-1.0.0 \
+        libssl-dev \
+        libx11-dev \
+        libxml2-dev \
+        man-db \
+        nano \
+        openssh-server \
+        screen \
+        software-properties-common \
+        swig \
+        tcl \
+        tcsh \
+        tk \
+        unzip \
+        wget \
+        wish \
+        xserver-xorg && \
+    rm -rf /var/lib/apt/lists/*
+
+# Intel Parallel Studio XE
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential \
+        cpio && \
+    rm -rf /var/lib/apt/lists/*
+COPY intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz
+COPY intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
+RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz -C /var/tmp -z && \
+    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc__x86_64;intel-ifort__x86_64;intel-mkl-core__x86_64/g' \
+        -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
+        -e 's/^#\?\(ACCEPT_EULA\)=.*/\1=accept/g' \
+        -e 's/^#\?\(ACTIVATION_TYPE\)=.*/\1=license_file/g' \
+        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2019_update5_cluster_edition/silent.cfg && \
+    cd /var/tmp/parallel_studio_xe_2019_update5_cluster_edition && ./install.sh --silent=silent.cfg && \
+    rm -rf /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition
+RUN echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata locales && \
+    ln -fs /usr/share/zoneinfo/America/Denver /etc/localtime && \
+    locale-gen --purge en_US.UTF-8 && \
+    dpkg-reconfigure --frontend noninteractive tzdata && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale "LANG=en_US.UTF-8" && \
+    update-locale "LANGUAGE=en_US:en"
+
+ENV BOOST_ROOT=/usr/local \
+    CC=mpiicc \
+    CXX=mpiicpc \
+    EIGEN3_INCLUDE_DIR=/usr/local \
+    FC=mpiifort \
+    HDF5_ROOT=/usr/local \
+    MPI_CC=mpiicc \
+    MPI_CXX=mpiicpc \
+    MPI_FC=mpiifort \
+    NETCDF=/usr/local \
+    NETCDF_ROOT=/usr/local \
+    PIO=/usr/local \
+    PNETCDF=/usr/local \
+    SERIAL_CC=icc \
+    SERIAL_CXX=icpc \
+    SERIAL_FC=ifort
+
+RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
+    echo "export FC=mpiifort" >> /etc/bash.bashrc && \
+    echo "export CC=mpiicc" >> /etc/bash.bashrc && \
+    echo "export CXX=mpiicpc" >> /etc/bash.bashrc && \
+    echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc && \
+    echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc && \
+    echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc && \
+    echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc && \
+    echo "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
+    chown -R jedi:jedi ~jedi/.gitconfig
+
+ENTRYPOINT ["/bin/bash", "-l"]
+
+

@@ -2,7 +2,7 @@
 
 # This script creates a new Charliecloud container and optionally pushes it to Amazon S3
 
-export CH_NAME=jedi-intel-impi-dev
+export CH_NAME=intel19-impi-dev
 
 # Stop if anything goes wrong
 set -e
@@ -10,13 +10,13 @@ set -e
 echo "Building Intel development container " 
 
 # create the Dockerfile
-../hpc-container-maker/hpccm.py --recipe intel-impi-dev.py --format docker > Dockerfile.intel-impi-dev
+../hpc-container-maker/hpccm.py --recipe ${CH_NAME}.py --format docker > Dockerfile.${CH_NAME}
 
 # build the Docker image
-sudo docker image build --no-cache -f Dockerfile.intel-impi-dev -t ${CH_NAME} .
+sudo docker image build --no-cache -f Dockerfile.${CH_NAME} -t jedi-${CH_NAME} .
 
 # save the Docker image to a file:
-sudo docker save ${CH_NAME}:latest | gzip > docker-${CH_NAME}.tar.gz
+sudo docker save jedi-${CH_NAME}:latest | gzip > docker-${CH_NAME}.tar.gz
 
 # build the Charliecloud image
 ch-build -t ${CH_NAME} -f Dockerfile.intel-impi-dev .
