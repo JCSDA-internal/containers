@@ -7,9 +7,11 @@ RUN apt-get update -y && \
         build-essential \
         csh \
         curl \
+        dirmngr \
         file \
         flex \
         git \
+        gnupg2 \
         ksh \
         less \
         libasound2 \
@@ -36,6 +38,9 @@ RUN apt-get update -y && \
         xserver-xorg && \
     rm -rf /var/lib/apt/lists/*
 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157 && \
+    apt-get update
+
 # Intel Parallel Studio XE
 RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -45,7 +50,7 @@ RUN apt-get update -y && \
 COPY intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz
 COPY intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
 RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz -C /var/tmp -z && \
-    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc__x86_64;intel-ifort__x86_64;intel-mkl-core__x86_64;intel-ifort-common__noarch;intel-icx__x86_64;intel-icc-common__noarch;intel-icc-common-ps__noarch;intel-mkl-cluster__x86_64;intel-mkl-gnu__x86_64;intel-mkl-doc__noarch;intel-mkl-doc-ps__noarch;intel-mkl-common-ps__noarch;intel-mkl-core-ps__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-common__noarch;intel-mkl-core-f__x86_64;intel-mkl-gnu-f__x86_64;intel-mkl-f95-common__noarch;intel-mkl-f__x86_64;intel-mkl-common-f__noarch;intel-mkl-cluster-c__noarch;intel-mkl-common-c-ps__noarch;intel-mkl-core-c__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-common-c__noarch;intel-mpi-rt__x86_64;intel-mpi-sdk__x86_64;intel-mpi-installer-license__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-mkl-psxe__noarch;intel-ippcp-psxe__noarch;intel-psxe-common__noarch;intel-ippcp-psxe__noarch;intel-psxe-licensing__noarch;intel-icsxe-pset;intel-icsxe__noarch;intel-imb__x86_64;intel-ips__noarch;intel-ipsc__noarch;intel-ipsf__noarch;intel-openmp__x86_64;intel-openmp-common__noarch;intel-openmp-common-icc__noarch;intel-openmp-common-ifort__noarch;intel-openmp-ifort__x86_64;intel-comp__x86_64</Abbr>;intel-comp-l-all-common__noarch;intel-comp-l-all-vars__noarch;intel-comp-nomcu-vars__noarch;intel-comp-ps__x86_64;intel-comp-ps-ss__x86_64;intel-comp-ps-ss-bec__x86_64;intel-comp-ps-ss-bec-32bit__x86_64/g' \
+    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc__x86_64;intel-ifort__x86_64;intel-mkl-core__x86_64;intel-ifort-common__noarch;intel-icx__x86_64;intel-icc-common__noarch;intel-icc-common-ps__noarch;intel-mkl-cluster__x86_64;intel-mkl-gnu__x86_64;intel-mkl-doc__noarch;intel-mkl-doc-ps__noarch;intel-mkl-common-ps__noarch;intel-mkl-core-ps__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-common__noarch;intel-mkl-core-f__x86_64;intel-mkl-gnu-f__x86_64;intel-mkl-f95-common__noarch;intel-mkl-f__x86_64;intel-mkl-common-f__noarch;intel-mkl-cluster-c__noarch;intel-mkl-common-c-ps__noarch;intel-mkl-core-c__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-common-c__noarch;intel-mpi-rt__x86_64;intel-mpi-sdk__x86_64;intel-mpi-installer-license__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-mkl-psxe__noarch;intel-ippcp-psxe__noarch;intel-psxe-common__noarch;intel-ippcp-psxe__noarch;intel-psxe-licensing__noarch;intel-icsxe-pset;intel-icsxe__noarch;intel-imb__x86_64;intel-ips__noarch;intel-ipsc__noarch;intel-ipsf__noarch;intel-openmp__x86_64;intel-openmp-common__noarch;intel-openmp-common-icc__noarch;intel-openmp-common-ifort__noarch;intel-openmp-ifort__x86_64;intel-comp__x86_64;intel-comp-l-all-common__noarch;intel-comp-l-all-vars__noarch;intel-comp-nomcu-vars__noarch;intel-comp-ps__x86_64;intel-comp-ps-ss__x86_64;intel-comp-ps-ss-bec__x86_64;intel-comp-ps-ss-bec-32bit__x86_64/g' \
         -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
         -e 's/^#\?\(ACCEPT_EULA\)=.*/\1=accept/g' \
         -e 's/^#\?\(ACTIVATION_TYPE\)=.*/\1=license_file/g' \
@@ -53,6 +58,50 @@ RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2019_update5_clus
     cd /var/tmp/parallel_studio_xe_2019_update5_cluster_edition && ./install.sh --silent=silent.cfg && \
     rm -rf /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition
 RUN echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
+
+# CMake version 3.13.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://cmake.org/files/v3.13/cmake-3.13.0-Linux-x86_64.sh && \
+    /bin/sh /var/tmp/cmake-3.13.0-Linux-x86_64.sh --prefix=/usr/local --skip-license && \
+    rm -rf /var/tmp/cmake-3.13.0-Linux-x86_64.sh
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        doxygen \
+        emacs \
+        git \
+        git-flow \
+        graphviz \
+        lynx \
+        nedit \
+        texinfo \
+        texlive-latex-recommended \
+        vim && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends git-lfs && \
+    git lfs install
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python-dev \
+        python-pip \
+        python-scipy \
+        python-yaml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-dev \
+        python3-pip \
+        python3-scipy \
+        python3-yaml && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata locales && \
@@ -79,6 +128,17 @@ ENV BOOST_ROOT=/usr/local \
     SERIAL_CC=icc \
     SERIAL_CXX=icpc \
     SERIAL_FC=ifort
+
+RUN cd /root && \
+    git clone https://github.com/jcsda/jedi-stack.git && \
+    cd jedi-stack/buildscripts && \
+    git checkout feature/intel19-container && \
+    ./build_stack.sh "container-intel-impi-dev" && \
+    mv ../jedi-stack-contents.log /etc && \
+    chmod a+r /etc/jedi-stack-contents.log && \
+    rm -rf /root/jedi-stack && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir /worktmp
 
 RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
     echo "export FC=mpiifort" >> /etc/bash.bashrc && \
