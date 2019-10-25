@@ -16,11 +16,11 @@ echo "Building Intel development container "
 sudo docker image build --no-cache -f Dockerfile.${CH_NAME} -t jedi-${CH_NAME} .
 
 # save the Docker image to a file:
-sudo docker save jedi-${CH_NAME}:latest | gzip > docker-${CH_NAME}.tar.gz
+mkdir -p containers
+sudo docker save jedi-${CH_NAME}:latest | gzip > containers/docker-${CH_NAME}.tar.gz
 
 # build the Charliecloud image
 ch-build -t ${CH_NAME} -f Dockerfile.intel-impi-dev .
-mkdir -p containers
 ch-builder2tar ${CH_NAME} containers
 
 # Optionally copy to amazon S3
