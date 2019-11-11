@@ -18,12 +18,33 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh',
                               'libgtk2.0-common','software-properties-common'])
 
 # Mellanox OFED
-Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
+#Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
 # Install Intel compilers, mpi, and mkl 
 Stage0 += intel_psxe(eula=True, license="intel_license/"+os.environ['INTEL_LICENSE'],
                      tarball='intel_tarballs/parallel_studio_xe_2017_update1.tgz',
-                     psxevars=True)
+                     psxevars=True, components=['intel-icc-l-all__x86_64',
+                     'intel-ifort-l-ps__x86_64', 'intel-mkl__x86_64', 
+                     'intel-mkl-rt__x86_64',
+                     'intel-mkl-ps-rt-jp__x86_64',
+                     'intel-mkl-ps-cluster-64bit__x86_64',
+                     'intel-mkl-ps-cluster-rt__x86_64',
+                     'intel-mkl-ps-common-64bit__x86_64',
+                     'intel-mkl-common-c-64bit__x86_64',
+                     'intel-mkl-gnu__x86_64',
+                     'intel-mkl-gnu-c__x86_64',
+                     'intel-mkl-gnu-rt__x86_64',
+                     'intel-mkl-ps-common-f-64bit__x86_64',
+                     'intel-mkl-ps-gnu-f-rt__x86_64',
+                     'intel-mkl-ps-gnu-f__x86_64',
+                     'intel-mkl-ps-f__x86_64',
+                     'intel-mpirt-l-ps-wrapper__x86_64',
+                     'intel-mpi-rt-core__x86_64',
+                     'intel-mpi-sdk-core__x86_64',
+                     'intel-mpi-doc__x86_64',
+                     'intel-mpi-psxe__x86_64',
+                     'intel-mpi-rt-psxe__x86_64',
+                     'intel-ccompxe__noarch', 'intel-fcompxe__noarch'])
 
 # get an up-to-date version of CMake
 Stage0 += cmake(eula=True,version="3.13.0")
@@ -37,7 +58,7 @@ Stage0 += shell(commands=
                 ['add-apt-repository ppa:git-core/ppa',
                  'curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash',
                  'apt-get update','apt-get install -y --no-install-recommends git-lfs','git lfs install'])
-# python
+## python
 Stage0 += apt_get(ospackages=['python-pip','python-dev','python-yaml',
                               'python-scipy'])
 
@@ -78,8 +99,10 @@ Stage0 += environment(variables={'NETCDF':'/usr/local',
 Stage0 += shell(commands=['cd /root', 
     'git clone https://github.com/jcsda/jedi-stack.git',
     'cd jedi-stack/buildscripts',
-    'git checkout feature/container-intel-dev',
+    'git checkout develop',
     './build_stack.sh "container-intel-impi-dev"',
+    'mv ../jedi-stack-contents.log /etc',
+    'chmod a+r /etc/jedi-stack-contents.log',
     'rm -rf /root/jedi-stack',
     'rm -rf /var/lib/apt/lists/*',
     'mkdir /worktmp'])
@@ -90,13 +113,11 @@ Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m
     'echo "export FC=mpiifort" >> /etc/bash.bashrc',
     'echo "export CC=mpiicc" >> /etc/bash.bashrc',
     'echo "export CXX=mpiicpc" >> /etc/bash.bashrc',
-    'echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc',
     'echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc',
     'echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
     'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc',
     'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
-    'mkdir ~jedi/.openmpi',
-    'echo "rmaps_base_oversubscribe = 1" >> ~jedi/.openmpi/mca-params.conf',
-    'chown -R jedi:jedi ~jedi/.gitconfig ~jedi/.openmpi'])
+    'chown -R jedi:jedi ~jedi/.gitconfig'])
 
 Stage0 += runscript(commands=['/bin/bash -l'])

@@ -4,7 +4,7 @@
 
 if [ $# -ne 1 ]; then
    echo "Usage: "
-   echo "./build_container.sh <container-name>>"
+   echo "./build_ch_container.sh <container-name>>"
    exit 1
 fi
 
@@ -15,9 +15,9 @@ CH_NAME=$1
 
 echo "Building Charliecloud container " ${CH_NAME}
 
-ch-build -t ${CH_NAME} --pull $HOME/charliecloud
+docker image build --no-cache --pull -t ${CH_NAME} -f Dockerfile.${CH_NAME} .
 mkdir -p containers
-ch-docker2tar ${CH_NAME} containers
+ch-builder2tar ${CH_NAME} containers
 
 # Optionally copy to amazon S3
 ans=''
@@ -29,7 +29,7 @@ while [[ $ans != y ]] && [[ $ans != n ]]; do
 done
 if [[ $ans == y ]] ; then
   echo "Sending to Amazon S3" 
-  aws s3 cp containers/${CH_NAME}.tar.gz s3://data.jcsda.org/containers/${CH_NAME}.tar.gz
+  aws s3 cp containers/${CH_NAME}.tar.gz s3://data.jcsda.org/containers/docker-${CH_NAME}.tar.gz
 else
   echo "Not sending to Amazon S3" 
 fi
