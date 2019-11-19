@@ -1,5 +1,5 @@
 # ch-test-scope: full
-FROM jcsda/docker-gnu-openmpi-dev:latest
+FROM jcsda/docker-clang-mpich-dev:latest
 LABEL maintainer "Mark Miesch <miesch@ucar.edu>"
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
