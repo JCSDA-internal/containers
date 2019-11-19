@@ -132,7 +132,7 @@ ENV BOOST_ROOT=/usr/local \
 RUN cd /root && \
     git clone https://github.com/jcsda/jedi-stack.git && \
     cd jedi-stack/buildscripts && \
-    git checkout feature/intel19-container && \
+    git checkout develop && \
     ./build_stack.sh "container-intel-impi-dev" && \
     mv ../jedi-stack-contents.log /etc && \
     chmod a+r /etc/jedi-stack-contents.log && \
@@ -150,8 +150,11 @@ RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
     echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc && \
     echo "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
     chown -R jedi:jedi ~jedi/.gitconfig
+<<<<<<< HEAD:Dockerfile.intel19-impi-dev
 
 ENV LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local
+=======
+>>>>>>> develop:Dockerfile.intel-impi-dev
 
 ENTRYPOINT ["/bin/bash", "-l"]
 

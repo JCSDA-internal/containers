@@ -93,7 +93,7 @@ Stage0 += apt_get(ospackages=['emacs','vim','nedit','graphviz','doxygen',
 Stage0 += shell(commands=
                 ['curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash',
                  'apt-get update','apt-get install -y --no-install-recommends git-lfs','git lfs install'])
-### python
+## python
 Stage0 += apt_get(ospackages=['python-pip','python-dev','python-yaml',
                               'python-scipy'])
 
@@ -133,7 +133,7 @@ Stage0 += environment(variables={'NETCDF':'/usr/local',
 Stage0 += shell(commands=['cd /root', 
     'git clone https://github.com/jcsda/jedi-stack.git',
     'cd jedi-stack/buildscripts',
-    'git checkout feature/intel19-container',
+    'git checkout develop',
     './build_stack.sh "container-intel-impi-dev"',
     'mv ../jedi-stack-contents.log /etc',
     'chmod a+r /etc/jedi-stack-contents.log',
