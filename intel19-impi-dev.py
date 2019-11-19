@@ -26,8 +26,8 @@ Stage0 += shell(commands=['apt-key adv --keyserver keyserver.ubuntu.com --recv-k
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
 # Install Intel compilers, mpi, and mkl 
-Stage0 += intel_psxe(eula=True, license="intel_license/"+os.environ['INTEL_LICENSE'],
-                     tarball='intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz',
+Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='../intel_license/COM_L___LXMW-67CW6CHW.lic'),
+                     tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz'),
                      psxevars=True, components=['intel-icc__x86_64',
                       'intel-ifort__x86_64', 'intel-mkl-core__x86_64',
                       'intel-ifort-common__noarch',

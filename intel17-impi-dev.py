@@ -21,8 +21,8 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh',
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
 # Install Intel compilers, mpi, and mkl 
-Stage0 += intel_psxe(eula=True, license="intel_license/"+os.environ['INTEL_LICENSE'],
-                     tarball='intel_tarballs/parallel_studio_xe_2017_update1.tgz',
+Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='../intel_license/COM_L___LXMW-67CW6CHW.lic'),
+                     tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2017_update1.tgz'),
                      psxevars=True, components=['intel-icc-l-all__x86_64',
                      'intel-ifort-l-ps__x86_64', 'intel-mkl__x86_64', 
                      'intel-mkl-rt__x86_64',
