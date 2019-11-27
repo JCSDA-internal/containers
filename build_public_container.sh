@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # This script creates a new Charliecloud container and optionally pushes it to Amazon S3
+# This is designed to use with our public containers that can just be pulled from 
+# Docker Hub, converted to a charliecloud container, and stored on data.jcsda.org 
 
 if [ $# -ne 1 ]; then
    echo "Usage: "
-   echo "./build_ch_container.sh <container-name>>"
+   echo "./build_ch_container.sh <container-name>"
    exit 1
 fi
 
@@ -29,7 +31,8 @@ while [[ $ans != y ]] && [[ $ans != n ]]; do
 done
 if [[ $ans == y ]] ; then
   echo "Sending to Amazon S3" 
-  aws s3 cp containers/${CH_NAME}.tar.gz s3://data.jcsda.org/containers/docker-${CH_NAME}.tar.gz
+  aws s3 cp s3://data.jcsda.org/containers/ch-jedi-${CH_NAME}-latest.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CH_NAME}-revert.tar.gz
+  aws s3 cp containers/${CH_NAME}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CH_NAME}-latest.tar.gz
 else
   echo "Not sending to Amazon S3" 
 fi

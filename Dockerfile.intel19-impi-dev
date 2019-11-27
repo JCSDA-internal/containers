@@ -1,4 +1,4 @@
-FROM ubuntu:16.04 AS stage0
+FROM ubuntu:18.04 AS stage0
 
 RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -7,14 +7,19 @@ RUN apt-get update -y && \
         build-essential \
         csh \
         curl \
+        dirmngr \
         file \
         flex \
+        git \
+        gnupg2 \
         ksh \
         less \
+        libasound2 \
         libcurl4-openssl-dev \
         libexpat1-dev \
         libgtk2.0-common \
         libncurses-dev \
+        libpango-1.0.0 \
         libssl-dev \
         libx11-dev \
         libxml2-dev \
@@ -29,8 +34,12 @@ RUN apt-get update -y && \
         tk \
         unzip \
         wget \
-        wish && \
+        wish \
+        xserver-xorg && \
     rm -rf /var/lib/apt/lists/*
+
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157 && \
+    apt-get update
 
 # Intel Parallel Studio XE
 RUN apt-get update -y && \
@@ -38,16 +47,16 @@ RUN apt-get update -y && \
         build-essential \
         cpio && \
     rm -rf /var/lib/apt/lists/*
-COPY intel_tarballs/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1.tgz
-COPY intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
-RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2017_update1.tgz -C /var/tmp -z && \
-    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc-l-all__x86_64;intel-ifort-l-ps__x86_64;intel-mkl__x86_64;intel-mkl-rt__x86_64;intel-mkl-ps-rt-jp__x86_64;intel-mkl-ps-cluster-64bit__x86_64;intel-mkl-ps-cluster-rt__x86_64;intel-mkl-ps-common-64bit__x86_64;intel-mkl-common-c-64bit__x86_64;intel-mkl-gnu__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-ps-common-f-64bit__x86_64;intel-mkl-ps-gnu-f-rt__x86_64;intel-mkl-ps-gnu-f__x86_64;intel-mkl-ps-f__x86_64;intel-mpirt-l-ps-wrapper__x86_64;intel-mpi-rt-core__x86_64;intel-mpi-sdk-core__x86_64;intel-mpi-doc__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-ccompxe__noarch;intel-fcompxe__noarch/g' \
+COPY ./intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz
+COPY ../intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
+RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz -C /var/tmp -z && \
+    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc__x86_64;intel-ifort__x86_64;intel-mkl-core__x86_64;intel-ifort-common__noarch;intel-icx__x86_64;intel-icc-common__noarch;intel-icc-common-ps__noarch;intel-mkl-cluster__x86_64;intel-mkl-gnu__x86_64;intel-mkl-doc__noarch;intel-mkl-doc-ps__noarch;intel-mkl-common-ps__noarch;intel-mkl-core-ps__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-common__noarch;intel-mkl-core-f__x86_64;intel-mkl-gnu-f__x86_64;intel-mkl-f95-common__noarch;intel-mkl-f__x86_64;intel-mkl-common-f__noarch;intel-mkl-cluster-c__noarch;intel-mkl-common-c-ps__noarch;intel-mkl-core-c__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-common-c__noarch;intel-mpi-rt__x86_64;intel-mpi-sdk__x86_64;intel-mpi-installer-license__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-mkl-psxe__noarch;intel-ippcp-psxe__noarch;intel-psxe-common__noarch;intel-ippcp-psxe__noarch;intel-psxe-licensing__noarch;intel-icsxe-pset;intel-icsxe__noarch;intel-imb__x86_64;intel-ips__noarch;intel-ipsc__noarch;intel-ipsf__noarch;intel-openmp__x86_64;intel-openmp-common__noarch;intel-openmp-common-icc__noarch;intel-openmp-common-ifort__noarch;intel-openmp-ifort__x86_64;intel-comp__x86_64;intel-comp-l-all-common__noarch;intel-comp-l-all-vars__noarch;intel-comp-nomcu-vars__noarch;intel-comp-ps__x86_64;intel-comp-ps-ss__x86_64;intel-comp-ps-ss-bec__x86_64;intel-comp-ps-ss-bec-32bit__x86_64/g' \
         -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
         -e 's/^#\?\(ACCEPT_EULA\)=.*/\1=accept/g' \
         -e 's/^#\?\(ACTIVATION_TYPE\)=.*/\1=license_file/g' \
-        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2017_update1/silent.cfg && \
-    cd /var/tmp/parallel_studio_xe_2017_update1 && ./install.sh --silent=silent.cfg && \
-    rm -rf /var/tmp/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1
+        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2019_update5_cluster_edition/silent.cfg && \
+    cd /var/tmp/parallel_studio_xe_2019_update5_cluster_edition && ./install.sh --silent=silent.cfg && \
+    rm -rf /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition
 RUN echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
 
 # CMake version 3.13.0
@@ -73,8 +82,7 @@ RUN apt-get update -y && \
         vim && \
     rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository ppa:git-core/ppa && \
-    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
     apt-get update && \
     apt-get install -y --no-install-recommends git-lfs && \
     git lfs install
@@ -142,6 +150,8 @@ RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
     echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc && \
     echo "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
     chown -R jedi:jedi ~jedi/.gitconfig
+
+ENV LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local
 
 ENTRYPOINT ["/bin/bash", "-l"]
 

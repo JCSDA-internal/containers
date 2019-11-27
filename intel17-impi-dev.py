@@ -21,8 +21,8 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh',
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
 # Install Intel compilers, mpi, and mkl 
-Stage0 += intel_psxe(eula=True, license="intel_license/"+os.environ['INTEL_LICENSE'],
-                     tarball='intel_tarballs/parallel_studio_xe_2017_update1.tgz',
+Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='../intel_license/COM_L___LXMW-67CW6CHW.lic'),
+                     tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2017_update1.tgz'),
                      psxevars=True, components=['intel-icc-l-all__x86_64',
                      'intel-ifort-l-ps__x86_64', 'intel-mkl__x86_64', 
                      'intel-mkl-rt__x86_64',
@@ -114,9 +114,11 @@ Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m
     'echo "export CC=mpiicc" >> /etc/bash.bashrc',
     'echo "export CXX=mpiicpc" >> /etc/bash.bashrc',
     'echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc',
-    'echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
     'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "export PYTHONPATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:$PYTHONPATH" >> /etc/bash.bashrc',
     'echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc',
+    'echo "export I_MPI_SHM_LMT=shm" >> /etc/bash.bashrc',
     'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
     'chown -R jedi:jedi ~jedi/.gitconfig'])
 

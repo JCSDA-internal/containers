@@ -1,5 +1,5 @@
 # ch-test-scope: full
-FROM jcsda/docker-gnu-openmpi-dev:latest
+FROM jcsda/docker-clang-mpich-dev:latest
 LABEL maintainer "Mark Miesch <miesch@ucar.edu>"
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
@@ -8,6 +8,7 @@ RUN apt-get update
 # Charliecloud does not modify the environment variables.  So, to set 
 # environment variables we need to put them in an initialization script
 RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /etc/bash.bashrc && \
+    echo 'export PATH=/usr/local/mpich/bin:$PATH' >> /etc/bash.bashrc && \
     echo 'export NETCDF=/usr/local' >> /etc/bash.bashrc && \
     echo 'export PNETCDF=/usr/local' >> /etc/bash.bashrc && \
     echo 'export PIO=/usr/local' >> /etc/bash.bashrc && \
