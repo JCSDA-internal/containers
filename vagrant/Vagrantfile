@@ -119,7 +119,7 @@ Vagrant.configure("2") do |config|
 
     # install Go
     cd $HOME
-    export VERSION=1.11.5 OS=linux ARCH=amd64
+    export VERSION=1.13.4 OS=linux ARCH=amd64
     wget -nv --no-check-certificate https://golang.org/dl/go$VERSION.$OS-$ARCH.tar.gz
     sudo tar -C /usr/local -xzf go$VERSION.$OS-$ARCH.tar.gz
     rm -f go$VERSION.$OS-$ARCH.tar.gz
@@ -134,7 +134,7 @@ Vagrant.configure("2") do |config|
     # build and install Singularity
     sudo mkdir -p /opt/singularity
     cd /opt/singularity
-    export VERSION=3.4.0
+    export VERSION=3.5.0
     sudo wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz 
     sudo tar -xzf singularity-${VERSION}.tar.gz
     cd singularity
