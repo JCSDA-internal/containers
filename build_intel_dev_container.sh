@@ -53,8 +53,8 @@ sudo docker save jedi-${CNAME}:latest | gzip > containers/docker-${CNAME}.tar.gz
 get_ans "Send Docker container to AWS S3?"
 if [[ $ans == y ]] ; then
   echo "Sending to Amazon S3" 
-  aws s3 cp s3://privatecontainers/docker-jedi-${CNAME}-latest.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-revert.tar.gz
-  echo aws s3 cp containers/docker-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-latest.tar.gz
+  aws s3 mv s3://privatecontainers/docker-jedi-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-revert.tar.gz
+  aws s3 cp containers/docker-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}.tar.gz
 else
   echo "Not sending to Amazon S3" 
 fi
@@ -74,8 +74,8 @@ if [[ $ans == y ]] ; then
     get_ans "Send Charliecloud container to AWS S3?"
     if [[ $ans == y ]] ; then
       echo "Sending to Amazon S3" 
-      aws s3 mb s3://privatecontainers/ch-jedi-${CNAME}-latest.tar.gz s3://privatecontainers/ch-jedi-${CNAME}-revert.tar.gz
-      aws s3 cp containers/jedi-${CNAME}.tar.gz s3://privatecontainers/ch-jedi-${CNAME}-latest.tar.gz
+      aws s3 cp s3://privatecontainers/ch-jedi-${CNAME}.tar.gz s3://privatecontainers/ch-jedi-${CNAME}-revert.tar.gz
+      aws s3 cp containers/jedi-${CNAME}.tar.gz s3://privatecontainers/ch-jedi-${CNAME}.tar.gz
     else
       echo "Not sending to Amazon S3" 
     fi
@@ -102,7 +102,7 @@ if [[ $ans == y ]] ; then
     if [[ $ans == y ]] ; then
       echo "Pushing to sylabs cloud" 
       singularity sign jedi-$CNAME.sif
-      aws s3 mb s3://privatecontainers/jedi-${CNAME}-latest.sif s3://privatecontainers/jedi-$CNAME-revert.sif
+      aws s3 mv s3://privatecontainers/jedi-${CNAME}-latest.sif s3://privatecontainers/jedi-$CNAME-revert.sif
       aws s3 cp containers/jedi-${CNAME}.sif s3://privatecontainers/jedi-${CNAME}-latest.sif
       #echo singularity push jedi-$CNAME.sif library://jcsda/jedi/jedi-$name:latest
     else
