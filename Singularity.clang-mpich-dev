@@ -1,5 +1,5 @@
 BootStrap: docker
-From: jcsda/docker-gnu-openmpi-dev:latest
+From: jcsda/docker-clang-mpich-dev:latest
 
 %labels
 MAINTAINER Mark Miesch
@@ -18,5 +18,5 @@ SPECIES JEDI
     mkdir -p /var/go
 
 %runscript
-    echo "Welcome, this is the Singularity container for JEDI with GNU 7 and OpenMPI"
+    echo "Welcome, this is the Singularity container for JEDI with clang/gfortran and mpich"
 
