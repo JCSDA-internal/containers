@@ -1,0 +1,28 @@
+BootStrap: docker
+From: jcsda/docker-gnu-openmpi-dev:latest
+
+%labels
+MAINTAINER Mark Miesch
+SPECIES JEDI
+
+%runscript
+    echo "Welcome, this is the Singularity container for JEDI with GNU 7 and OpenMPI"
+
+%environments
+    DISPLAY=:0.0
+    export DISPLAY
+    TERM=xterm
+    export TERM
+    FC=mpifort
+    export FC
+    CXX=mpicxx
+    export CXX
+    CC=mpicc
+    export CC
+    GIT_MERGE_AUTOEDIT=no
+    export GIT_MERGE_AUTOEDIT
+
+%post
+    echo "Hello from inside the container"
+    echo "Install additional software here"
+    mkdir -p /var/go
