@@ -6,7 +6,6 @@ function get_ans {
     while [[ $ans != y ]] && [[ $ans != n ]]; do
       echo $1
       read ans < /dev/stdin
-      if [[ -z $ans ]]; then ans=$defans; fi
       if [[ $ans != y ]] && [[ $ans != n ]]; then echo "You must enter y or n"; fi
     done
 }    

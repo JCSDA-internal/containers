@@ -18,5 +18,5 @@ SPECIES JEDI
     mkdir -p /var/go
 
 %runscript
-    echo "Welcome, this is the Singularity container for JEDI with clang/gfortran and mpich"
+    bash -l
 

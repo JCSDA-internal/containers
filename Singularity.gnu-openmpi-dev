@@ -18,5 +18,5 @@ SPECIES JEDI
     mkdir -p /var/go
 
 %runscript
-    echo "Welcome, this is the Singularity container for JEDI with GNU 7 and OpenMPI"
+    bash -l
 
