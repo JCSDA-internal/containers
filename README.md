@@ -22,7 +22,7 @@ To use the Charliecloud container, enter, e.g.
 
 ## Intel Containers
 
-The intel containers are handled a bit differently than the gnu containers because of licensing issues.  First you have to put the license file into the intel_license directory.  This is not included in the git repository because it is proprietary but it will be included in the development charliecloud container (intel-impi-dev), along with the compilers and mpi library.  
+The intel containers are handled a bit differently than the gnu containers because of licensing issues.  First you have to put the license file into the intel_license directory and the tarballs in a driectory called intel_tarballs.  These have to go within the context directory (intel17 or intel19) to enable Docker to copy them to the container.  These are not included in the git repository because they are proprietary but they will be included in the development charliecloud container (intel-impi-dev), along with the compilers and mpi library.  
 
 So, **Do not push the Intel containers to a public repository**
 
