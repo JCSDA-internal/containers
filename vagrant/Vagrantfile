@@ -141,6 +141,7 @@ Vagrant.configure("2") do |config|
     sudo ./mconfig
     sudo make -C builddir
     sudo make -C builddir install
+    sudo rm /opt/singularity/singularity-${VERSION}.tar.gz
 
   EOF
 
