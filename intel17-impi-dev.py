@@ -21,7 +21,7 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh',
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
 # Install Intel compilers, mpi, and mkl 
-Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='../intel_license/COM_L___LXMW-67CW6CHW.lic'),
+Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='./intel_license/COM_L___LXMW-67CW6CHW.lic'),
                      tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2017_update1.tgz'),
                      psxevars=True, components=['intel-icc-l-all__x86_64',
                      'intel-ifort-l-ps__x86_64', 'intel-mkl__x86_64', 
@@ -99,7 +99,7 @@ Stage0 += environment(variables={'NETCDF':'/usr/local',
 Stage0 += shell(commands=['cd /root', 
     'git clone https://github.com/jcsda/jedi-stack.git',
     'cd jedi-stack/buildscripts',
-    'git checkout develop',
+    'git checkout bugfix/intel17-container',
     './build_stack.sh "container-intel-impi-dev"',
     'mv ../jedi-stack-contents.log /etc',
     'chmod a+r /etc/jedi-stack-contents.log',
