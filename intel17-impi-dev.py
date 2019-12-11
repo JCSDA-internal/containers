@@ -107,6 +107,32 @@ Stage0 += shell(commands=['cd /root',
     'rm -rf /var/lib/apt/lists/*',
     'mkdir /worktmp'])
 
+# build private repos
+Stage0 += environment(variables={'CC':'mpiicc',
+                                 'CXX':'mpiicpc',
+                                 'FC':'mpiifort'})
+Stage0 += copy(src='ssh-key/github_academy_rsa', dest='/root/github_academy_rsa')
+Stage0 += shell(commands=['mkdir -p /root/.ssh',
+    'mv /root/github_academy_rsa /root/.ssh/github_academy_rsa',
+    'eval "$(ssh-agent -s)"',
+    'ssh-add /root/.ssh/github_academy_rsa',
+    'ssh -T -o "StrictHostKeyChecking=no" git@github.com',
+    'mkdir -p /root/jedi', 'cd /root/jedi',
+    'git clone git@github.com:jcsda/odc.git',
+    'cd odc && git checkout develop',
+    'mkdir -p build && cd build',
+    'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
+    'make -j4', 'make install',
+    'cd /root/jedi',
+    'git clone git@github.com:jcsda/odyssey.git',
+    'cd odyssey && git checkout develop',
+    'mkdir -p build && cd build',
+    'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
+    'make -j4 && make install',
+    'rm -rf /root/jedi/odc',
+    'rm -rf /root/jedi/odyssey',
+    'rm /root/.ssh/github_academy_rsa'])
+
 #Make a non-root user:jedi / group:jedi for running MPI
 # also set FC, CC, and CXX environment variables and paths for all users
 Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi',
