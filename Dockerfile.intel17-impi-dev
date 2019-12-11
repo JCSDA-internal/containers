@@ -132,6 +132,34 @@ RUN cd /root && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir /worktmp
 
+ENV CC=mpiicc \
+    CXX=mpiicpc \
+    FC=mpiifort
+
+COPY ssh-key/github_academy_rsa /root/github_academy_rsa
+
+RUN mkdir -p /root/.ssh && \
+    mv /root/github_academy_rsa /root/.ssh/github_academy_rsa && \
+    eval "$(ssh-agent -s)" && \
+    ssh-add /root/.ssh/github_academy_rsa && \
+    ssh -T -o "StrictHostKeyChecking=no" git@github.com; mkdir -p /root/jedi && \
+    cd /root/jedi && \
+    git clone git@github.com:jcsda/odc.git && \
+    cd odc && git checkout develop && \
+    mkdir -p build && cd build && \
+    ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
+    make -j4 && \
+    make install && \
+    cd /root/jedi && \
+    git clone git@github.com:jcsda/odyssey.git && \
+    cd odyssey && git checkout develop && \
+    mkdir -p build && cd build && \
+    ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
+    make -j4 && make install && \
+    rm -rf /root/jedi/odc && \
+    rm -rf /root/jedi/odyssey && \
+    rm /root/.ssh/github_academy_rsa
+
 RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
     echo "export FC=mpiifort" >> /etc/bash.bashrc && \
     echo "export CC=mpiicc" >> /etc/bash.bashrc && \
