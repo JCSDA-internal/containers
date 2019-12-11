@@ -47,7 +47,6 @@ cd ${INTEL_CONTEXT}
 ln -sf ../Dockerfile.${CNAME} .
 #sudo docker image build --no-cache -f Dockerfile.${CNAME} -t jedi-${CNAME} .
 sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} .
-exit 0
 
 # save the Docker image to a file:
 cd ..
@@ -73,7 +72,7 @@ echo "=============================================================="
 get_ans "Build Charliecloud image?"
 if [[ $ans == y ]] ; then
     echo "Building Charliecloud image"
-    ch-builder2tar jedi-${CNAME} containers
+    sudo ch-builder2tar jedi-${CNAME} containers
 
     # Optionally copy to amazon S3
     get_ans "Push Charliecloud container to AWS S3?"
