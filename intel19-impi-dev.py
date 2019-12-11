@@ -17,7 +17,7 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh','git',
                               'libcurl4-openssl-dev','nano','screen', 'libasound2',
                               'libgtk2.0-common','software-properties-common',
                               'libpango-1.0.0','xserver-xorg','dirmngr',
-                              'gnupg2'])
+                              'gnupg2','lsb-release'])
 
 # update apt keys
 Stage0 += shell(commands=['apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157',

@@ -18,7 +18,7 @@ function get_ans {
 
 export CNAME=${1:-"intel19-impi-dev"}
 
-export INTEL_LICENSE_FILE='../intel_license/COM_L___LXMW-67CW6CHW.lic'
+export INTEL_LICENSE_FILE='./intel_license/COM_L___LXMW-67CW6CHW.lic'
 
 if [[ $(echo ${CNAME} | cut -d- -f1) = "intel17" ]]; then
     export INTEL_TARBALL='./intel_tarballs/parallel_studio_xe_2017_update1.tgz'
@@ -39,10 +39,15 @@ echo "=============================================================="
 # create the Dockerfile
 ../hpc-container-maker/hpccm.py --recipe ${CNAME}.py --format docker > Dockerfile.${CNAME}
 
+# process the Dockerfile to change to bash shell
+sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
+
 # build the Docker image
 cd ${INTEL_CONTEXT}
 ln -sf ../Dockerfile.${CNAME} .
-sudo docker image build --no-cache -f Dockerfile.${CNAME} -t jedi-${CNAME} .
+#sudo docker image build --no-cache -f Dockerfile.${CNAME} -t jedi-${CNAME} .
+sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} .
+exit 0
 
 # save the Docker image to a file:
 cd ..
