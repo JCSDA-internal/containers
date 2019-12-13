@@ -133,7 +133,7 @@ ENV BOOST_ROOT=/usr/local \
 RUN cd /root && \
     git clone https://github.com/jcsda/jedi-stack.git && \
     cd jedi-stack/buildscripts && \
-    git checkout feature/odc && \
+    git checkout develop && \
     ./build_stack.sh "container-intel-impi-dev" && \
     mv ../jedi-stack-contents.log /etc && \
     chmod a+r /etc/jedi-stack-contents.log && \
