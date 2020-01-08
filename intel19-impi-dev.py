@@ -17,7 +17,7 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh','git',
                               'libcurl4-openssl-dev','nano','screen', 'libasound2',
                               'libgtk2.0-common','software-properties-common',
                               'libpango-1.0.0','xserver-xorg','dirmngr',
-                              'gnupg2'])
+                              'gnupg2','lsb-release'])
 
 # update apt keys
 Stage0 += shell(commands=['apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157',
@@ -150,11 +150,46 @@ Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m
     'echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc',
     'echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
     'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "export PYTHONPATH=/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc',
     'echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc',
     'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
     'chown -R jedi:jedi ~jedi/.gitconfig'])
 
 # this appears to be needed to avoid a bootup error message for docker run
 Stage0 += environment(variables={'LD_LIBRARY_PATH':'/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local'})
+
+# build private repos
+
+# this needs to be processed with SED - hpccm does not offer a means for
+# generating a docker SHELL block
+Stage0 += shell(commands=['DOCKERSHELL BASH'])
+
+Stage0 += environment(variables={'CC':'mpiicc',
+                                 'CXX':'mpiicpc',
+                                 'FC':'mpiifort'})
+
+Stage0 += copy(src='ssh-key/github_academy_rsa', dest='/root/github_academy_rsa')
+
+Stage0 += shell(commands=['mkdir -p /root/.ssh',
+    'mv /root/github_academy_rsa /root/.ssh/github_academy_rsa',
+    'eval "$(ssh-agent -s)"',
+    'source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64',
+    'ssh-add /root/.ssh/github_academy_rsa',
+    'ssh -T -o "StrictHostKeyChecking=no" git@github.com; mkdir -p /root/jedi',
+    'cd /root/jedi',
+    'git clone git@github.com:jcsda/odc.git',
+    'cd odc && git checkout develop',
+    'mkdir -p build && cd build',
+    'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
+    'make -j4', 'make install',
+    'cd /root/jedi',
+    'git clone git@github.com:jcsda/odyssey.git',
+    'cd odyssey && git checkout develop',
+    'mkdir -p build && cd build',
+    'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
+    'make -j4 && make install',
+    'rm -rf /root/jedi/odc',
+    'rm -rf /root/jedi/odyssey',
+    'rm /root/.ssh/github_academy_rsa'])
 
 Stage0 += runscript(commands=['/bin/bash -l'])

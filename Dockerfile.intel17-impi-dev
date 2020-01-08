@@ -18,6 +18,7 @@ RUN apt-get update -y && \
         libssl-dev \
         libx11-dev \
         libxml2-dev \
+        lsb-release \
         man-db \
         nano \
         openssh-server \
@@ -38,7 +39,7 @@ RUN apt-get update -y && \
         build-essential \
         cpio && \
     rm -rf /var/lib/apt/lists/*
-COPY intel_tarballs/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1.tgz
+COPY ./intel_tarballs/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1.tgz
 COPY ./intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
 RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2017_update1.tgz -C /var/tmp -z && \
     sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc-l-all__x86_64;intel-ifort-l-ps__x86_64;intel-mkl__x86_64;intel-mkl-rt__x86_64;intel-mkl-ps-rt-jp__x86_64;intel-mkl-ps-cluster-64bit__x86_64;intel-mkl-ps-cluster-rt__x86_64;intel-mkl-ps-common-64bit__x86_64;intel-mkl-common-c-64bit__x86_64;intel-mkl-gnu__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-ps-common-f-64bit__x86_64;intel-mkl-ps-gnu-f-rt__x86_64;intel-mkl-ps-gnu-f__x86_64;intel-mkl-ps-f__x86_64;intel-mpirt-l-ps-wrapper__x86_64;intel-mpi-rt-core__x86_64;intel-mpi-sdk-core__x86_64;intel-mpi-doc__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-ccompxe__noarch;intel-fcompxe__noarch/g' \
@@ -139,11 +140,42 @@ RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
     echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc && \
     echo "export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc && \
     echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc && \
-    echo "export PYTHONPATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:$PYTHONPATH" >> /etc/bash.bashrc && \
+    echo "export PYTHONPATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc && \
     echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc && \
     echo "export I_MPI_SHM_LMT=shm" >> /etc/bash.bashrc && \
     echo "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
     chown -R jedi:jedi ~jedi/.gitconfig
+
+SHELL ["/bin/bash", "-c"]
+
+ENV CC=mpiicc \
+    CXX=mpiicpc \
+    FC=mpiifort
+
+COPY ssh-key/github_academy_rsa /root/github_academy_rsa
+
+RUN mkdir -p /root/.ssh && \
+    mv /root/github_academy_rsa /root/.ssh/github_academy_rsa && \
+    eval "$(ssh-agent -s)" && \
+    source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64 && \
+    ssh-add /root/.ssh/github_academy_rsa && \
+    ssh -T -o "StrictHostKeyChecking=no" git@github.com; mkdir -p /root/jedi && \
+    cd /root/jedi && \
+    git clone git@github.com:jcsda/odc.git && \
+    cd odc && git checkout develop && \
+    mkdir -p build && cd build && \
+    ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
+    make -j4 && \
+    make install && \
+    cd /root/jedi && \
+    git clone git@github.com:jcsda/odyssey.git && \
+    cd odyssey && git checkout develop && \
+    mkdir -p build && cd build && \
+    ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
+    make -j4 && make install && \
+    rm -rf /root/jedi/odc && \
+    rm -rf /root/jedi/odyssey && \
+    rm /root/.ssh/github_academy_rsa
 
 ENTRYPOINT ["/bin/bash", "-l"]
 

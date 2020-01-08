@@ -9,7 +9,7 @@ import os
 # Base image
 Stage0.baseimage('ubuntu:16.04')
 
-Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh',         
+Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh','lsb-release',
                               'openssh-server','libncurses-dev','libssl-dev',
                               'libx11-dev','less','man-db','tk','tcl','swig',
                               'bc','file','flex','bison','libexpat1-dev',
@@ -21,7 +21,7 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh',
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
 # Install Intel compilers, mpi, and mkl 
-Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='./intel_license/COM_L___LXMW-67CW6CHW.lic'),
+Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='intel_license/COM_L___LXMW-67CW6CHW.lic'),
                      tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2017_update1.tgz'),
                      psxevars=True, components=['intel-icc-l-all__x86_64',
                      'intel-ifort-l-ps__x86_64', 'intel-mkl__x86_64', 
@@ -116,10 +116,45 @@ Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m
     'echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc',
     'echo "export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
     'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
-    'echo "export PYTHONPATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:$PYTHONPATH" >> /etc/bash.bashrc',
+    'echo "export PYTHONPATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc',
     'echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc',
     'echo "export I_MPI_SHM_LMT=shm" >> /etc/bash.bashrc',
     'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
     'chown -R jedi:jedi ~jedi/.gitconfig'])
+
+
+# build private repos
+
+# this needs to be processed with SED - hpccm does not offer a means for
+# generating a docker SHELL block
+Stage0 += shell(commands=['DOCKERSHELL BASH'])
+
+Stage0 += environment(variables={'CC':'mpiicc',
+                                 'CXX':'mpiicpc',
+                                 'FC':'mpiifort'})
+
+Stage0 += copy(src='ssh-key/github_academy_rsa', dest='/root/github_academy_rsa')
+
+Stage0 += shell(commands=['mkdir -p /root/.ssh',
+    'mv /root/github_academy_rsa /root/.ssh/github_academy_rsa',
+    'eval "$(ssh-agent -s)"',
+    'source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64',
+    'ssh-add /root/.ssh/github_academy_rsa',
+    'ssh -T -o "StrictHostKeyChecking=no" git@github.com; mkdir -p /root/jedi', 
+    'cd /root/jedi',
+    'git clone git@github.com:jcsda/odc.git',
+    'cd odc && git checkout develop',
+    'mkdir -p build && cd build',
+    'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
+    'make -j4', 'make install',
+    'cd /root/jedi',
+    'git clone git@github.com:jcsda/odyssey.git',
+    'cd odyssey && git checkout develop',
+    'mkdir -p build && cd build',
+    'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
+    'make -j4 && make install',
+    'rm -rf /root/jedi/odc',
+    'rm -rf /root/jedi/odyssey',
+    'rm /root/.ssh/github_academy_rsa'])
 
 Stage0 += runscript(commands=['/bin/bash -l'])

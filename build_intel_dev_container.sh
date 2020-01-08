@@ -18,7 +18,7 @@ function get_ans {
 
 export CNAME=${1:-"intel19-impi-dev"}
 
-export INTEL_LICENSE_FILE='../intel_license/COM_L___LXMW-67CW6CHW.lic'
+export INTEL_LICENSE_FILE='./intel_license/COM_L___LXMW-67CW6CHW.lic'
 
 if [[ $(echo ${CNAME} | cut -d- -f1) = "intel17" ]]; then
     export INTEL_TARBALL='./intel_tarballs/parallel_studio_xe_2017_update1.tgz'
@@ -39,10 +39,14 @@ echo "=============================================================="
 # create the Dockerfile
 ../hpc-container-maker/hpccm.py --recipe ${CNAME}.py --format docker > Dockerfile.${CNAME}
 
+# process the Dockerfile to change to bash shell
+sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
+
 # build the Docker image
 cd ${INTEL_CONTEXT}
 ln -sf ../Dockerfile.${CNAME} .
-sudo docker image build --no-cache -f Dockerfile.${CNAME} -t jedi-${CNAME} .
+#sudo docker image build --no-cache -f Dockerfile.${CNAME} -t jedi-${CNAME} .
+sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} .
 
 # save the Docker image to a file:
 cd ..
@@ -68,7 +72,7 @@ echo "=============================================================="
 get_ans "Build Charliecloud image?"
 if [[ $ans == y ]] ; then
     echo "Building Charliecloud image"
-    ch-builder2tar jedi-${CNAME} containers
+    sudo ch-builder2tar jedi-${CNAME} containers
 
     # Optionally copy to amazon S3
     get_ans "Push Charliecloud container to AWS S3?"
