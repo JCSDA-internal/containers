@@ -58,13 +58,11 @@ Stage0 += shell(commands=
                 ['add-apt-repository ppa:git-core/ppa',
                  'curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash',
                  'apt-get update','apt-get install -y --no-install-recommends git-lfs','git lfs install'])
-## python
-Stage0 += apt_get(ospackages=['python-pip','python-dev','python-yaml',
-                              'python-scipy'])
 
 # python3
 Stage0 += apt_get(ospackages=['python3-pip','python3-dev','python3-yaml',
                               'python3-scipy'])
+Stage0 += shell(commands=['ln -s /usr/bin/python3 /usr/bin/python'])
 
 
 # locales time zone and language support
@@ -147,12 +145,14 @@ Stage0 += shell(commands=['mkdir -p /root/.ssh',
     'mkdir -p build && cd build',
     'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
     'make -j4', 'make install',
+    'echo "odc jcsda-develop" >> /etc/jedi-stack-contents.log',
     'cd /root/jedi',
     'git clone git@github.com:jcsda/odyssey.git',
     'cd odyssey && git checkout develop',
     'mkdir -p build && cd build',
     'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
     'make -j4 && make install',
+    'echo "odyssey jcsda-develop" >> /etc/jedi-stack-contents.log',
     'rm -rf /root/jedi/odc',
     'rm -rf /root/jedi/odyssey',
     'rm /root/.ssh/github_academy_rsa'])

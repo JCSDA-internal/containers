@@ -55,8 +55,8 @@ if [[ $ans == y ]] ; then
     get_ans "Push Charliecloud image to S3?"
     if [[ $ans == y ]] ; then
 	echo "Sending to Amazon S3" 
-        [[ $("aws s3 ls s3://data.jcsda.org/containers/") ]] && \
-	   aws s3 mv s3://data.jcsda.org/containers/ch-jedi-${CNAME}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CNAME}-revert.tar.gz
+        #[[ $("aws s3 ls s3://data.jcsda.org/containers/") ]] && \
+	aws s3 mv s3://data.jcsda.org/containers/ch-jedi-${CNAME}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CNAME}-revert.tar.gz
 	aws s3 cp containers/ch-${CNAME}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CNAME}.tar.gz
     else
 	echo "Not sending to Amazon S3" 
