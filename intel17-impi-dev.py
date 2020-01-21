@@ -74,6 +74,7 @@ Stage0 += shell(commands=['apt-get update',
      'dpkg-reconfigure --frontend=noninteractive locales',
      'update-locale \"LANG=en_US.UTF-8\"',
      'update-locale \"LANGUAGE=en_US:en\"'])
+Stage0 += environment(variables={'LANG':'en_US.UTF-8','LANGUAGE':'en_US:en'})
 
 # set environment variables for jedi-stack build
 Stage0 += environment(variables={'NETCDF':'/usr/local',

@@ -93,13 +93,11 @@ Stage0 += apt_get(ospackages=['emacs','vim','nedit','graphviz','doxygen',
 Stage0 += shell(commands=
                 ['curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash',
                  'apt-get update','apt-get install -y --no-install-recommends git-lfs','git lfs install'])
-## python
-Stage0 += apt_get(ospackages=['python-pip','python-dev','python-yaml',
-                              'python-scipy'])
 
 # python3
 Stage0 += apt_get(ospackages=['python3-pip','python3-dev','python3-yaml',
                               'python3-scipy'])
+Stage0 += shell(commands=['ln -s /usr/bin/python3 /usr/bin/python'])
 
 # locales time zone and language support
 Stage0 += shell(commands=['apt-get update',
@@ -110,6 +108,7 @@ Stage0 += shell(commands=['apt-get update',
      'dpkg-reconfigure --frontend=noninteractive locales',
      'update-locale \"LANG=en_US.UTF-8\"',
      'update-locale \"LANGUAGE=en_US:en\"'])
+Stage0 += environment(variables={'LANG':'en_US.UTF-8','LANGUAGE':'en_US:en'})
 
 # set environment variables for jedi-stack build
 Stage0 += environment(variables={'NETCDF':'/usr/local',
