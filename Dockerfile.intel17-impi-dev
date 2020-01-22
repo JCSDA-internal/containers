@@ -143,7 +143,7 @@ RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
     echo "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
     chown -R jedi:jedi ~jedi/.gitconfig
 
-RUN DOCKERSHELL BASH
+SHELL ["/bin/bash", "-c"]
 
 ENV CC=mpiicc \
     CXX=mpiicpc \
