@@ -39,8 +39,8 @@ RUN apt-get update -y && \
         build-essential \
         cpio && \
     rm -rf /var/lib/apt/lists/*
-COPY ./intel_tarballs/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1.tgz
-COPY ./intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
+COPY intel_tarballs/parallel_studio_xe_2017_update1.tgz /var/tmp/parallel_studio_xe_2017_update1.tgz
+COPY intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
 RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2017_update1.tgz -C /var/tmp -z && \
     sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc-l-all__x86_64;intel-ifort-l-ps__x86_64;intel-mkl__x86_64;intel-mkl-rt__x86_64;intel-mkl-ps-rt-jp__x86_64;intel-mkl-ps-cluster-64bit__x86_64;intel-mkl-ps-cluster-rt__x86_64;intel-mkl-ps-common-64bit__x86_64;intel-mkl-common-c-64bit__x86_64;intel-mkl-gnu__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-ps-common-f-64bit__x86_64;intel-mkl-ps-gnu-f-rt__x86_64;intel-mkl-ps-gnu-f__x86_64;intel-mkl-ps-f__x86_64;intel-mpirt-l-ps-wrapper__x86_64;intel-mpi-rt-core__x86_64;intel-mpi-sdk-core__x86_64;intel-mpi-doc__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-ccompxe__noarch;intel-fcompxe__noarch/g' \
         -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
@@ -82,19 +82,13 @@ RUN add-apt-repository ppa:git-core/ppa && \
 
 RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        python-dev \
-        python-pip \
-        python-scipy \
-        python-yaml && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         python3-dev \
         python3-pip \
         python3-scipy \
         python3-yaml && \
     rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata locales && \
@@ -104,6 +98,9 @@ RUN apt-get update && \
     dpkg-reconfigure --frontend=noninteractive locales && \
     update-locale "LANG=en_US.UTF-8" && \
     update-locale "LANGUAGE=en_US:en"
+
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en
 
 ENV BOOST_ROOT=/usr/local \
     CC=mpiicc \
@@ -167,12 +164,14 @@ RUN mkdir -p /root/.ssh && \
     ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
     make -j4 && \
     make install && \
+    echo "odc jcsda-develop" >> /etc/jedi-stack-contents.log && \
     cd /root/jedi && \
     git clone git@github.com:jcsda/odyssey.git && \
     cd odyssey && git checkout develop && \
     mkdir -p build && cd build && \
     ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
     make -j4 && make install && \
+    echo "odyssey jcsda-develop" >> /etc/jedi-stack-contents.log && \
     rm -rf /root/jedi/odc && \
     rm -rf /root/jedi/odyssey && \
     rm /root/.ssh/github_academy_rsa

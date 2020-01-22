@@ -5,8 +5,6 @@ vagrant/vagrant_data/
 vagrant/.vagrant
 intel_license/
 intel_tarballs/
-context/
-context19/
-context17/
-build.log
+context*
+*.log
 ssh-key/

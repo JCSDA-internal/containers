@@ -12,6 +12,8 @@ SPECIES JEDI
     export TERM
     GIT_MERGE_AUTOEDIT=no
     export GIT_MERGE_AUTOEDIT
+    export LANG=en_US.UTF-8
+    export LANGUAGE=en_US:en
 
 %post
     echo "Hello from inside the container"
