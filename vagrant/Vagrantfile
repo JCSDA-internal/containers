@@ -93,6 +93,7 @@ Vagrant.configure("2") do |config|
     set -e             
     apt-get update
     apt-get install -y build-essential python gcc curl
+    apt-get install -y autoconf pkg-config libtool autoconf-archive
     apt-get update
   EOF
 
@@ -104,8 +105,11 @@ Vagrant.configure("2") do |config|
     cd $HOME/build
     git clone --recursive https://github.com/hpc/charliecloud.git
     cd charliecloud
+    ./autogen.sh
+    ./configure --prefix=/usr/local --disable-tests --disable-html
     make
-    sudo make install PREFIX=/usr/local
+    sudo make install
+    cd $HOME
     rm -rf $HOME/build
   EOF
 
@@ -141,7 +145,6 @@ Vagrant.configure("2") do |config|
     sudo ./mconfig
     sudo make -C builddir
     sudo make -C builddir install
-    sudo rm /opt/singularity/singularity-${VERSION}.tar.gz
 
   EOF
 
