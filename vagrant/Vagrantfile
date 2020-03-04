@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
       exec "vagrant " + ARGV.join(' ')
   end
 
-  config.disksize.size = "50GB"
+  config.disksize.size = "64GB"
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
@@ -80,7 +80,7 @@ Vagrant.configure("2") do |config|
      vb.memory = "12288"
 
      # Customize the number of cores in the VM:
-     vb.cpus = "6"
+     vb.cpus = "12"
    end
 
   #
