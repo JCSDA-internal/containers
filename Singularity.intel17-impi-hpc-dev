@@ -37,6 +37,14 @@ From: ubuntu:16.04
         wish
     rm -rf /var/lib/apt/lists/*
 
+%post -c /bin/bash
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libpmi0 \
+        libpmi0-dbg \
+        libpmi0-dev
+    rm -rf /var/lib/apt/lists/*
+
 # Intel Parallel Studio XE
 %post -c /bin/bash
     apt-get update -y
@@ -229,6 +237,19 @@ From: ubuntu:16.04
     rm -rf /root/jedi/odc
     rm -rf /root/jedi/odyssey
     rm /root/.ssh/github_academy_rsa
+
+%environment
+    export I_MPI_PMI_LIBRARY=/usr/lib/x86_64-linux-gnu/libpmi.so
+    export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi
+    export I_MPI_SHM_LMT=shm
+    export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/mic/lib:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:
+    export PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/bin/intel64:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/intel64/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+%post -c /bin/bash
+    export I_MPI_PMI_LIBRARY=/usr/lib/x86_64-linux-gnu/libpmi.so
+    export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi
+    export I_MPI_SHM_LMT=shm
+    export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/mic/lib:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:
+    export PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/bin/intel64:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/intel64/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 %runscript
     exec /bin/bash -l "$@"

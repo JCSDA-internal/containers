@@ -20,6 +20,9 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh','lsb-release'
                               'libcurl4-openssl-dev','nano','screen',
                               'libgtk2.0-common','software-properties-common'])
 
+# PMI library
+Stage0 += apt_get(ospackages=['libpmi0','libpmi0-dbg','libpmi0-dev'])
+
 # Mellanox OFED
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
@@ -109,22 +112,6 @@ Stage0 += shell(commands=['cd /root',
     'rm -rf /var/lib/apt/lists/*',
     'mkdir /worktmp'])
 
-#Make a non-root user:jedi / group:jedi for running MPI
-# also set FC, CC, and CXX environment variables and paths for all users
-Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi',
-    'echo "export FC=mpiifort" >> /etc/bash.bashrc',
-    'echo "export CC=mpiicc" >> /etc/bash.bashrc',
-    'echo "export CXX=mpiicpc" >> /etc/bash.bashrc',
-    'echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc',
-    'echo "export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
-    'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
-    'echo "export PYTHONPATH=/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc',
-    'echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc',
-    'echo "export I_MPI_SHM_LMT=shm" >> /etc/bash.bashrc',
-    'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
-    'chown -R jedi:jedi ~jedi/.gitconfig'])
-
-
 # build private repos
 
 # this needs to be processed with SED - hpccm does not offer a means for
@@ -160,5 +147,11 @@ Stage0 += shell(commands=['mkdir -p /root/.ssh',
     'rm -rf /root/jedi/odc',
     'rm -rf /root/jedi/odyssey',
     'rm /root/.ssh/github_academy_rsa'])
+
+Stage0 += environment(variables={'I_MPI_PMI_LIBRARY':'/usr/lib/x86_64-linux-gnu/libpmi.so',
+    'I_MPI_ROOT':'/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi',
+    'I_MPI_SHM_LMT':'shm',
+    'PATH':'/opt/intel/compilers_and_libraries_2017.1.132/linux/bin/intel64:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/intel64/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    'LD_LIBRARY_PATH':'/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2017.1.132/linux/mpi/mic/lib:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64:/usr/local/lib:'})
 
 Stage0 += runscript(commands=['/bin/bash -l'])
