@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
       exec "vagrant " + ARGV.join(' ')
   end
 
-  config.disksize.size = "50GB"
+  config.disksize.size = "64GB"
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
@@ -80,7 +80,7 @@ Vagrant.configure("2") do |config|
      vb.memory = "12288"
 
      # Customize the number of cores in the VM:
-     vb.cpus = "6"
+     vb.cpus = "12"
    end
 
   #
@@ -91,8 +91,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "environment", type: "shell", privileged: true,
                        inline: <<-EOF
     set -e             
+    export DEBIAN_FRONTEND=noninteractive
     apt-get update
     apt-get install -y build-essential python gcc curl
+    apt-get install -y autoconf pkg-config libtool autoconf-archive
     apt-get update
   EOF
 
@@ -100,12 +102,16 @@ Vagrant.configure("2") do |config|
   config.vm.provision "charliecloud", type: "shell", privileged: false,
                        inline: <<-EOF
     set -e             
+    export DEBIAN_FRONTEND=noninteractive
     mkdir -p $HOME/build
     cd $HOME/build
     git clone --recursive https://github.com/hpc/charliecloud.git
     cd charliecloud
+    ./autogen.sh
+    ./configure --prefix=/usr/local --disable-tests --disable-html
     make
-    sudo make install PREFIX=/usr/local
+    sudo make install
+    cd $HOME
     rm -rf $HOME/build
   EOF
 
@@ -113,6 +119,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "singularity", type: "shell", privileged: false,
                       inline: <<-EOF
     set -e
+    export DEBIAN_FRONTEND=noninteractive
 
     # package dependencies
     sudo apt-get install -y libssl-dev uuid-dev libgpgme11-dev squashfs-tools
