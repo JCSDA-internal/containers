@@ -1,0 +1,285 @@
+BootStrap: docker
+From: ubuntu:18.04
+%post -c /bin/bash
+    . /.singularity.d/env/10-docker*.sh
+
+%post -c /bin/bash
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bc \
+        bison \
+        build-essential \
+        csh \
+        curl \
+        dirmngr \
+        file \
+        flex \
+        git \
+        gnupg2 \
+        ksh \
+        less \
+        libasound2 \
+        libcurl4-openssl-dev \
+        libexpat1-dev \
+        libgtk2.0-common \
+        libncurses-dev \
+        libpango-1.0.0 \
+        libssl-dev \
+        libx11-dev \
+        libxml2-dev \
+        lsb-release \
+        man-db \
+        nano \
+        openssh-server \
+        screen \
+        software-properties-common \
+        swig \
+        tcl \
+        tcsh \
+        tk \
+        unzip \
+        wget \
+        wish \
+        xserver-xorg
+    rm -rf /var/lib/apt/lists/*
+
+%post -c /bin/bash
+    cd /
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
+    apt-get update
+
+%post -c /bin/bash
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libpmi0 \
+        libpmi0-dev
+    rm -rf /var/lib/apt/lists/*
+
+# Intel Parallel Studio XE
+%post -c /bin/bash
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential \
+        cpio
+    rm -rf /var/lib/apt/lists/*
+%files
+    ./intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz
+%files
+    ./intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
+%post -c /bin/bash
+    cd /
+    mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz -C /var/tmp -z
+    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc__x86_64;intel-ifort__x86_64;intel-mkl-core__x86_64;intel-ifort-common__noarch;intel-icx__x86_64;intel-icc-common__noarch;intel-icc-common-ps__noarch;intel-mkl-cluster__x86_64;intel-mkl-gnu__x86_64;intel-mkl-doc__noarch;intel-mkl-doc-ps__noarch;intel-mkl-common-ps__noarch;intel-mkl-core-ps__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-common__noarch;intel-mkl-core-f__x86_64;intel-mkl-gnu-f__x86_64;intel-mkl-f95-common__noarch;intel-mkl-f__x86_64;intel-mkl-common-f__noarch;intel-mkl-cluster-c__noarch;intel-mkl-common-c-ps__noarch;intel-mkl-core-c__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-common-c__noarch;intel-mpi-rt__x86_64;intel-mpi-sdk__x86_64;intel-mpi-installer-license__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-mkl-psxe__noarch;intel-ippcp-psxe__noarch;intel-psxe-common__noarch;intel-ippcp-psxe__noarch;intel-psxe-licensing__noarch;intel-icsxe-pset;intel-icsxe__noarch;intel-imb__x86_64;intel-ips__noarch;intel-ipsc__noarch;intel-ipsf__noarch;intel-openmp__x86_64;intel-openmp-common__noarch;intel-openmp-common-icc__noarch;intel-openmp-common-ifort__noarch;intel-openmp-ifort__x86_64;intel-comp__x86_64;intel-comp-l-all-common__noarch;intel-comp-l-all-vars__noarch;intel-comp-nomcu-vars__noarch;intel-comp-ps__x86_64;intel-comp-ps-ss__x86_64;intel-comp-ps-ss-bec__x86_64;intel-comp-ps-ss-bec-32bit__x86_64/g' \
+        -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
+        -e 's/^#\?\(ACCEPT_EULA\)=.*/\1=accept/g' \
+        -e 's/^#\?\(ACTIVATION_TYPE\)=.*/\1=license_file/g' \
+        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2019_update5_cluster_edition/silent.cfg
+    cd /var/tmp/parallel_studio_xe_2019_update5_cluster_edition && ./install.sh --silent=silent.cfg
+    rm -rf /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition
+%post -c /bin/bash
+    cd /
+    echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
+
+# CMake version 3.13.0
+%post -c /bin/bash
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        wget
+    rm -rf /var/lib/apt/lists/*
+%post -c /bin/bash
+    cd /
+    mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://cmake.org/files/v3.13/cmake-3.13.0-Linux-x86_64.sh
+    /bin/sh /var/tmp/cmake-3.13.0-Linux-x86_64.sh --prefix=/usr/local --skip-license
+    rm -rf /var/tmp/cmake-3.13.0-Linux-x86_64.sh
+
+%post -c /bin/bash
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        doxygen \
+        emacs \
+        git \
+        git-flow \
+        graphviz \
+        lynx \
+        nedit \
+        texinfo \
+        texlive-latex-recommended \
+        vim
+    rm -rf /var/lib/apt/lists/*
+
+%post -c /bin/bash
+    cd /
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+    apt-get update
+    apt-get install -y --no-install-recommends git-lfs
+    git lfs install
+
+%post -c /bin/bash
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-dev \
+        python3-pip \
+        python3-scipy \
+        python3-yaml
+    rm -rf /var/lib/apt/lists/*
+
+%post -c /bin/bash
+    cd /
+    ln -s /usr/bin/python3 /usr/bin/python
+
+%post -c /bin/bash
+    cd /
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata locales
+    ln -fs /usr/share/zoneinfo/America/Denver /etc/localtime
+    locale-gen --purge en_US.UTF-8
+    dpkg-reconfigure --frontend noninteractive tzdata
+    dpkg-reconfigure --frontend=noninteractive locales
+    update-locale "LANG=en_US.UTF-8"
+    update-locale "LANGUAGE=en_US:en"
+
+%environment
+    export LANG=en_US.UTF-8
+    export LANGUAGE=en_US:en
+%post -c /bin/bash
+    export LANG=en_US.UTF-8
+    export LANGUAGE=en_US:en
+
+%environment
+    export BOOST_ROOT=/usr/local
+    export CC=mpiicc
+    export CXX=mpiicpc
+    export EIGEN3_INCLUDE_DIR=/usr/local
+    export FC=mpiifort
+    export HDF5_ROOT=/usr/local
+    export MPI_CC=mpiicc
+    export MPI_CXX=mpiicpc
+    export MPI_FC=mpiifort
+    export NETCDF=/usr/local
+    export NETCDF_ROOT=/usr/local
+    export PIO=/usr/local
+    export PNETCDF=/usr/local
+    export SERIAL_CC=icc
+    export SERIAL_CXX=icpc
+    export SERIAL_FC=ifort
+%post -c /bin/bash
+    export BOOST_ROOT=/usr/local
+    export CC=mpiicc
+    export CXX=mpiicpc
+    export EIGEN3_INCLUDE_DIR=/usr/local
+    export FC=mpiifort
+    export HDF5_ROOT=/usr/local
+    export MPI_CC=mpiicc
+    export MPI_CXX=mpiicpc
+    export MPI_FC=mpiifort
+    export NETCDF=/usr/local
+    export NETCDF_ROOT=/usr/local
+    export PIO=/usr/local
+    export PNETCDF=/usr/local
+    export SERIAL_CC=icc
+    export SERIAL_CXX=icpc
+    export SERIAL_FC=ifort
+
+%post -c /bin/bash
+    cd /
+    cd /root
+    git clone https://github.com/jcsda/jedi-stack.git
+    cd jedi-stack/buildscripts
+    git checkout develop
+    ./build_stack.sh "container-intel-impi-dev"
+    mv ../jedi-stack-contents.log /etc
+    chmod a+r /etc/jedi-stack-contents.log
+    rm -rf /root/jedi-stack
+    rm -rf /var/lib/apt/lists/*
+    mkdir /worktmp
+
+%post -c /bin/bash
+    cd /
+    echo "export FC=mpiifort" >> /etc/bash.bashrc
+    echo "export CC=mpiicc" >> /etc/bash.bashrc
+    echo "export CXX=mpiicpc" >> /etc/bash.bashrc
+    echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc
+    echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc
+    echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc
+    echo "export PYTHONPATH=/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc
+    echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
+
+%environment
+    export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local
+%post -c /bin/bash
+    export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local
+
+%environment
+    export CC=mpiicc
+    export CXX=mpiicpc
+    export FC=mpiifort
+%post -c /bin/bash
+    export CC=mpiicc
+    export CXX=mpiicpc
+    export FC=mpiifort
+
+%files
+    ssh-key/github_academy_rsa /root/github_academy_rsa
+
+%post -c /bin/bash
+    cd /
+    mkdir -p /root/.ssh
+    mv /root/github_academy_rsa /root/.ssh/github_academy_rsa
+    eval "$(ssh-agent -s)"
+    source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+    ssh-add /root/.ssh/github_academy_rsa
+    mkdir -p /root/jedi
+    cd /root/jedi
+    git clone git@github.com:jcsda/odc.git
+    cd odc && git checkout develop
+    echo "odc develop" >> /etc/jedi-stack-contents.log
+    mkdir -p build && cd build
+    ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..
+    make -j4
+    make install
+    cd /root/jedi
+    git clone git@github.com:jcsda/odyssey.git
+    cd odyssey && git checkout develop
+    mkdir -p build && cd build
+    ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..
+    make -j4 && make install
+    echo "odyssey develop" >> /etc/jedi-stack-contents.log
+    rm -rf /root/jedi/odc
+    rm -rf /root/jedi/odyssey
+    rm /root/.ssh/github_academy_rsa
+
+%environment
+    export CLASSPATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/mpi.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/daal.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/mpi.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/daal.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/mpi.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/daal.jar
+    export CPATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/pstl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/pstl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/pstl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/include
+    export FI_PROVIDER_PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib/prov
+    export INFOPATH=/opt/intel/documentation_2019/en/debugger/gdb-ia/info/:/opt/intel/documentation_2019/en/debugger/gdb-ia/info/
+    export I_MPI_PMI_LIBRARY=/usr/lib/x86_64-linux-gnu/libpmi.so
+    export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi
+    export I_MPI_SHM_LMT=shm
+    export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/release:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/release:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/debugger_2019/libipt/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/usr/local/lib:
+    export LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/usr/local/lib:
+    export MANPATH=/opt/intel/man/common:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/man:/opt/intel/man/common:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/man:/opt/intel/documentation_2019/en/debugger/gdb-ia/man/:/opt/intel/man/common:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/man:/opt/intel/documentation_2019/en/debugger/gdb-ia/man/:/usr/local/man:/usr/local/share/man:/usr/share/man
+    export NLSPATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/debugger_2019/gdb/intel64/share/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/debugger_2019/gdb/intel64/share/locale/%l_%t/%N
+    export PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/bin/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/bin:/opt/intel/debugger_2019/gdb/intel64/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    export PKG_CONFIG_PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/bin/pkgconfig:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/bin/pkgconfig:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/bin/pkgconfig
+    export PYTHONPATH=/usr/local/lib:
+%post -c /bin/bash
+    export CLASSPATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/mpi.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/daal.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/mpi.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/daal.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/mpi.jar:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/daal.jar
+    export CPATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/pstl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/pstl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/pstl/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/include:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/include
+    export FI_PROVIDER_PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib/prov
+    export INFOPATH=/opt/intel/documentation_2019/en/debugger/gdb-ia/info/:/opt/intel/documentation_2019/en/debugger/gdb-ia/info/
+    export I_MPI_PMI_LIBRARY=/usr/lib/x86_64-linux-gnu/libpmi.so
+    export I_MPI_ROOT=/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi
+    export I_MPI_SHM_LMT=shm
+    export LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/release:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/release:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/debugger_2019/libipt/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/usr/local/lib:
+    export LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/usr/local/lib:
+    export MANPATH=/opt/intel/man/common:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/man:/opt/intel/man/common:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/man:/opt/intel/documentation_2019/en/debugger/gdb-ia/man/:/opt/intel/man/common:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/man:/opt/intel/documentation_2019/en/debugger/gdb-ia/man/:/usr/local/man:/usr/local/share/man:/usr/share/man
+    export NLSPATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/debugger_2019/gdb/intel64/share/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/debugger_2019/gdb/intel64/share/locale/%l_%t/%N
+    export PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/bin/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/bin:/opt/intel/debugger_2019/gdb/intel64/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    export PKG_CONFIG_PATH=/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/bin/pkgconfig:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/bin/pkgconfig:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/bin/pkgconfig
+    export PYTHONPATH=/usr/local/lib:
+
+%runscript
+    exec /bin/bash -l "$@"
+
+
