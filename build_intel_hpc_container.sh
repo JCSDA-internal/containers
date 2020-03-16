@@ -14,7 +14,7 @@ function get_ans {
 #------------------------------------------------------------------------
 # This script creates an intel singularity container for use on HPC systems
 
-export CNAME=${1:-"intel17-impi-hpc-dev"}
+export CNAME=${1:-"intel19-impi-hpc-dev"}
 
 export INTEL_LICENSE_FILE='./intel_license/COM_L___LXMW-67CW6CHW.lic'
 
