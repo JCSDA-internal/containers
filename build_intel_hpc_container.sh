@@ -31,7 +31,7 @@ set -e
 
 echo "Building Intel HPC Singularity container " 
 
-../hpc-container-maker/hpccm.py --recipe ${CNAME}.py --format singularity > Singularity.${CNAME}
+hpccm --recipe ${CNAME}.py --format singularity > Singularity.${CNAME}
 
 # make sure the sections are executed in bash
 sed -i -e 's/\%post/\%post -c \/bin\/bash/g' Singularity.${CNAME}

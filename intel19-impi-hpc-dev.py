@@ -25,8 +25,9 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh','git',
 Stage0 += shell(commands=['apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157',
                           'apt-get update'])
 
-# PMI library
+# PMI libraries
 Stage0 += apt_get(ospackages=['libpmi0','libpmi0-dev'])
+Stage0 += slurm_pmi2(version='17.11.13')
 
 # Mellanox OFED
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
@@ -193,8 +194,7 @@ Stage0 += shell(commands=['mkdir -p /root/.ssh',
     'rm /root/.ssh/github_academy_rsa'])
 
 # set up intel paths explicitly so there is no need to source compilervars.sh
-Stage0 += environment(variables={'I_MPI_PMI_LIBRARY':'/usr/lib/x86_64-linux-gnu/libpmi.so',
-    'I_MPI_ROOT':'/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi',
+Stage0 += environment(variables={'I_MPI_ROOT':'/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi',
     'I_MPI_SHM_LMT':'shm',
     'PATH':'/opt/intel/compilers_and_libraries_2019.5.281/linux/bin/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/bin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/bin:/opt/intel/debugger_2019/gdb/intel64/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
     'LD_LIBRARY_PATH':'/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/release:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib/release:/opt/intel/compilers_and_libraries_2019.5.281/linux/mpi/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2019.5.281/linux/compiler/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/compilers_and_libraries_2019.5.281/linux/tbb/lib/intel64/gcc4.7:/opt/intel/debugger_2019/libipt/intel64/lib:/opt/intel/compilers_and_libraries_2019.5.281/linux/daal/lib/intel64_lin:/usr/local/lib:',
