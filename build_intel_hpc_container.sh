@@ -34,9 +34,10 @@ echo "Building Intel HPC Singularity container "
 hpccm --recipe ${CNAME}.py --format singularity > Singularity.${CNAME}
 
 # make sure the sections are executed in bash
-sed -i -e 's/\%post/\%post -c \/bin\/bash/g' Singularity.${CNAME}
+#sed -i -e 's/\%post/\%post -c \/bin\/bash/g' Singularity.${CNAME}
 
 cd $INTEL_CONTEXT
 rm -f build.log
-sudo singularity build ../containers/jedi-${CNAME}.sif ../Singularity.${CNAME} 2>&1 | tee build.log
+#sudo singularity build ../containers/jedi-${CNAME}.sif ../Singularity.${CNAME} 2>&1 | tee build.log
+sudo singularity build ../sintel.sif ../Singularity.${CNAME} 2>&1 | tee build.log
 
