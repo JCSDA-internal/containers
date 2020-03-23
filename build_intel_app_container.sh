@@ -18,7 +18,7 @@ function get_ans {
 
 set -ex
 
-export CNAME=${1:-"intel19-impi-hello"}
+export CNAME=${1:-"intel19-impi-hpc-dev"}
 
 export INTEL_LICENSE_FILE='./intel_license/COM_L___LXMW-67CW6CHW.lic'
 
@@ -45,10 +45,7 @@ hpccm --recipe ${CNAME}.py --format docker > Dockerfile.${CNAME}
 sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
 
 # build the Docker image
-cd ${INTEL_CONTEXT}
-ln -sf ../Dockerfile.${CNAME} .
-#sudo docker image build --no-cache -f Dockerfile.${CNAME} -t jedi-${CNAME} .
-sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} .
+sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} ${INTEL_CONTEXT}
 
 echo "Exiting after building Docker image"
 exit 0
