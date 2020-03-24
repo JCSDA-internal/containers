@@ -18,7 +18,7 @@ function get_ans {
 
 set -ex
 
-export CNAME=${1:-"intel19-impi-hpc-dev"}
+export CNAME=${1:-"intel19-impi-hpc-app"}
 
 export INTEL_LICENSE_FILE='./intel_license/COM_L___LXMW-67CW6CHW.lic'
 
@@ -45,47 +45,11 @@ hpccm --recipe ${CNAME}.py --format docker > Dockerfile.${CNAME}
 sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
 
 # build the Docker image
-sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} ${INTEL_CONTEXT}
-
-echo "Exiting after building Docker image"
-exit 0
-
-# save the Docker image to a file:
-cd ..
-mkdir -p containers
-sudo docker save jedi-${CNAME}:latest | gzip > containers/docker-${CNAME}.tar.gz
-
-# Optionally copy to amazon S3
-get_ans "Send Docker container to AWS S3?"
-if [[ $ans == y ]] ; then
-  echo "Sending to Amazon S3" 
-  aws s3 mv s3://privatecontainers/docker-jedi-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-revert.tar.gz
-  aws s3 cp containers/docker-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}.tar.gz
-else
-  echo "Not sending to Amazon S3" 
-fi
-
+rm -f docker_build.log
+sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} ${INTEL_CONTEXT} 2>&1 | tee docker_build.log
 
 echo "=============================================================="
-echo "   Building Charliecloud Image"
+echo "   Building Singularity Image"
 echo "=============================================================="
-
-# build the Charliecloud image
-get_ans "Build Charliecloud image?"
-if [[ $ans == y ]] ; then
-    echo "Building Charliecloud image"
-    sudo ch-builder2tar jedi-${CNAME} containers
-
-    # Optionally copy to amazon S3
-    get_ans "Push Charliecloud container to AWS S3?"
-    if [[ $ans == y ]] ; then
-      echo "Sending to Amazon S3" 
-      aws s3 cp s3://privatecontainers/ch-jedi-${CNAME}.tar.gz s3://privatecontainers/ch-jedi-${CNAME}-revert.tar.gz
-      aws s3 cp containers/jedi-${CNAME}.tar.gz s3://privatecontainers/ch-jedi-${CNAME}.tar.gz
-    else
-      echo "Not sending to Amazon S3" 
-    fi
-
-else
-    echo "Not Building Charliecloud image"
-fi
+rm -f singularity_build.log
+sudo singularity build containers/jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:latest 2>&1 | tee singularity_build.log

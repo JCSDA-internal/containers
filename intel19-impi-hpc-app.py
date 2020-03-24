@@ -152,42 +152,42 @@ Stage0 += shell(commands=[
     'git clone git@github.com:jcsda/fv3-jedi.git -b develop',
     'mkdir -p /jedi/build','cd /jedi/build',
     'ecbuild --build=Release ../fv3-bundle',
-    'make -j4', 'chmod -R 777 /jedi'
+    'make -j4', 'chmod -R 777 /jedi',
     'rm /root/.ssh/github_academy_rsa'])
 
 #==============================================================================
 # Second stage: Runtime
 #==============================================================================
-#Stage1 += baseimage(image='ubuntu:18.04', _as='runtime')
-#Stage1 += bs
-#Stage1 += k
-#Stage1 += baselibs
-#Stage1 += o.runtime()
-#Stage1 += p
-#Stage1 += kn.runtime()
-#Stage1 += x.runtime()
-#Stage1 += u.runtime()
-#Stage1 += copy(_from='build', src='/usr/local', dest='/usr/local')
-##Stage1 += copy(_from='build', src='/jedi', dest='/jedi')
+Stage1 += baseimage(image='ubuntu:18.04', _as='runtime')
+Stage1 += bs
+Stage1 += k
+Stage1 += baselibs
+Stage1 += o.runtime()
+Stage1 += p
+Stage1 += kn.runtime()
+Stage1 += x.runtime()
+Stage1 += u.runtime()
+Stage1 += copy(_from='build', src='/usr/local', dest='/usr/local')
+Stage1 += copy(_from='build', src='/jedi', dest='/jedi')
 
 # set some environment variables for bash users
-#Stage1 += shell(commands=['echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc',
-#    'echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
-#    'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
-#    'echo "export PYTHONPATH=/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc'])
-#
+Stage1 += shell(commands=['echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc',
+    'echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "export PYTHONPATH=/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc'])
+
 # install intel Parallel Studio runtime libraries
 # The hppcm building blocks are not working
 ##Stage1 += intel_mpi(eula=True)
 ##Stage1 += mkl(eula=True)
 ##Stage1 += intel_psxe_runtime(eula=True,daal=False,ipp=False,tbb=False)
-#Stage1 += shell(commands=['mkdir -p /root/tmp','cd /root/tmp',
-#    'wget  https://apt.repos.intel.com/2020/GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
-#    'apt-key add GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
-#    'rm GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
-#    'echo "deb https://apt.repos.intel.com/2020 intel-psxe-runtime main" > /etc/apt/sources.list.d/intel-psxe-runtime-2020.list',
-#    'apt-get update -y',
-#    'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends intel-psxe-runtime',
-#    'echo "source /opt/intel/psxe_runtime/linux/bin/psxevars.sh intel64" >> /etc/bash.bashrc',
-#    'rm -rf /root/tmp',
-#    'rm -rf /var/lib/apt/lists/*'])
+Stage1 += shell(commands=['mkdir -p /root/tmp','cd /root/tmp',
+    'wget  https://apt.repos.intel.com/2020/GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
+    'apt-key add GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
+    'rm GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
+    'echo "deb https://apt.repos.intel.com/2020 intel-psxe-runtime main" > /etc/apt/sources.list.d/intel-psxe-runtime-2020.list',
+    'apt-get update -y',
+    'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends intel-psxe-runtime',
+    'echo "source /opt/intel/psxe_runtime/linux/bin/psxevars.sh intel64" >> /etc/bash.bashrc',
+    'rm -rf /root/tmp',
+    'rm -rf /var/lib/apt/lists/*'])

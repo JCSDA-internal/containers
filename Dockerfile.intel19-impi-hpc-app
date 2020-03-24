@@ -258,6 +258,129 @@ RUN source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64 
     cd /jedi/build && \
     ecbuild --build=Release ../fv3-bundle && \
     make -j4 && \
-    chmod -R 777 /jedirm /root/.ssh/github_academy_rsa
+    chmod -R 777 /jedi && \
+    rm /root/.ssh/github_academy_rsa
 
+FROM ubuntu:18.04 AS runtime
 
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        apt-utils \
+        build-essential \
+        gnupg2 && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157 && \
+    apt-get update
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bc \
+        bison \
+        csh \
+        curl \
+        dirmngr \
+        doxygen \
+        emacs \
+        file \
+        flex \
+        git \
+        git \
+        git-flow \
+        graphviz \
+        ksh \
+        less \
+        libasound2 \
+        libcurl4-openssl-dev \
+        libexpat1-dev \
+        libgtk2.0-common \
+        libncurses-dev \
+        libpango-1.0.0 \
+        libssl-dev \
+        libx11-dev \
+        libxml2-dev \
+        lsb-release \
+        lynx \
+        man-db \
+        nano \
+        nedit \
+        openssh-server \
+        screen \
+        software-properties-common \
+        swig \
+        tcl \
+        tcsh \
+        texinfo \
+        texlive-latex-recommended \
+        tk \
+        unzip \
+        vim \
+        wget \
+        wish \
+        xserver-xorg && \
+    rm -rf /var/lib/apt/lists/*
+
+# OFED
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        dapl2-utils \
+        ibutils \
+        ibverbs-providers \
+        ibverbs-utils \
+        infiniband-diags \
+        libdapl-dev \
+        libdapl2 \
+        libibmad-dev \
+        libibmad5 \
+        libibverbs-dev \
+        libibverbs1 \
+        librdmacm-dev \
+        librdmacm1 \
+        rdmacm-utils && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libpmi0 \
+        libpmi0-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# KNEM
+COPY --from=0 /usr/local/knem /usr/local/knem
+ENV CPATH=/usr/local/knem/include:$CPATH
+
+# XPMEM
+COPY --from=0 /usr/local/xpmem /usr/local/xpmem
+ENV CPATH=/usr/local/xpmem/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/xpmem/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/xpmem/lib:$LIBRARY_PATH
+
+# UCX
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libbinutils && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=0 /usr/local/ucx /usr/local/ucx
+ENV LD_LIBRARY_PATH=/usr/local/ucx/lib:$LD_LIBRARY_PATH \
+    PATH=/usr/local/ucx/bin:$PATH
+
+COPY --from=build /usr/local /usr/local
+
+COPY --from=build /jedi /jedi
+
+RUN echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc && \
+    echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc && \
+    echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc && \
+    echo "export PYTHONPATH=/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc
+
+RUN mkdir -p /root/tmp && \
+    cd /root/tmp && \
+    wget  https://apt.repos.intel.com/2020/GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020 && \
+    apt-key add GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020 && \
+    rm GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020 && \
+    echo "deb https://apt.repos.intel.com/2020 intel-psxe-runtime main" > /etc/apt/sources.list.d/intel-psxe-runtime-2020.list && \
+    apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends intel-psxe-runtime && \
+    echo "source /opt/intel/psxe_runtime/linux/bin/psxevars.sh intel64" >> /etc/bash.bashrc && \
+    rm -rf /root/tmp && \
+    rm -rf /var/lib/apt/lists/*
