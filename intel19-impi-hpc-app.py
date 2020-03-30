@@ -40,6 +40,8 @@ Stage0 += o
 # PMI libraries
 p = apt_get(ospackages=['libpmi0','libpmi0-dev'])
 Stage0 += p
+pp = slurm_pmi2()
+Stage0 += pp
 
 # UCX and components
 kn = knem()
@@ -155,6 +157,12 @@ Stage0 += shell(commands=[
     'make -j4', 'chmod -R 777 /jedi',
     'rm /root/.ssh/github_academy_rsa'])
 
+# Add hello world program for testing MPI configuration on different platforms
+Stage0 += copy(src='./hello_world_mpi.c', dest='/root/jedi/hello_world_mpi.c')
+Stage0 += shell(commands=['export COMPILERVARS_ARCHITECTURE=intel64',
+                      '. /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh',
+                      'cd /root/jedi','mpiicc hello_world_mpi.c -o /usr/local/bin/hello_world_mpi -lstdc++'])
+
 #==============================================================================
 # Second stage: Runtime
 #==============================================================================
@@ -164,6 +172,7 @@ Stage1 += k
 Stage1 += baselibs
 Stage1 += o.runtime()
 Stage1 += p
+Stage1 += pp.runtime()
 Stage1 += kn.runtime()
 Stage1 += x.runtime()
 Stage1 += u.runtime()
@@ -180,14 +189,31 @@ Stage1 += shell(commands=['echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.
 # The hppcm building blocks are not working
 ##Stage1 += intel_mpi(eula=True)
 ##Stage1 += mkl(eula=True)
-##Stage1 += intel_psxe_runtime(eula=True,daal=False,ipp=False,tbb=False)
+#Stage1 += intel_psxe_runtime(eula=True,daal=False,ipp=False,tbb=False,version='2020.0.008')
+Stage1 += apt_get(ospackages=['apt-transport-https','ca-certificates','gcc',
+          'man-db','openssh-client'])
 Stage1 += shell(commands=['mkdir -p /root/tmp','cd /root/tmp',
     'wget  https://apt.repos.intel.com/2020/GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
     'apt-key add GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
     'rm GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020',
-    'echo "deb https://apt.repos.intel.com/2020 intel-psxe-runtime main" > /etc/apt/sources.list.d/intel-psxe-runtime-2020.list',
+    'echo "deb https://apt.repos.intel.com/2020 intel-psxe-runtime main" >> /etc/apt/sources.list.d/hpccm.list',
     'apt-get update -y',
-    'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends intel-psxe-runtime',
-    'echo "source /opt/intel/psxe_runtime/linux/bin/psxevars.sh intel64" >> /etc/bash.bashrc',
-    'rm -rf /root/tmp',
-    'rm -rf /var/lib/apt/lists/*'])
+    'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends aptitude',
+    "aptitude install -y --without-recommends -o Aptitude::ProblemResolver::SolutionCost='100*canceled-actions,200*removals' intel-icc-runtime=2020.0-8 intel-ifort-runtime=2020-8 intel-mkl-runtime=2020.0-8 intel-mpi-runtime=2020.0-8",'rm -rf /var/lib/apt/lists/*'])
+
+Stage1 += environment(variables={'LD_LIBRARY_PATH':'/opt/intel/psxe_runtime_2020.0.8/linux/daal/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/mkl/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/lib/intel64:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/../tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/libfabric/lib:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib/release:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin:/usr/local/lib:/usr/local/ucx/lib:/usr/local/xpmem/lib:',
+    'FI_PROVIDER_PATH':'/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/libfabric/lib/prov',
+    'CLASSPATH':'/opt/intel/psxe_runtime_2020.0.8/linux/daal/lib/daal.jar:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib/mpi.jar',
+    'CPATH':'/opt/intel/psxe_runtime_2020.0.8/linux/daal/include:/opt/intel/psxe_runtime_2020.0.8/linux/mkl/include:/opt/intel/psxe_runtime_2020.0.8/linux/tbb/include:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/include:/usr/local/xpmem/include:/usr/local/knem/include:',
+    'NLSPATH':'/opt/intel/psxe_runtime_2020.0.8/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin/locale/%l_%t/%N',
+    'LIBRARY_PATH':'/opt/intel/psxe_runtime_2020.0.8/linux/daal/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/mkl/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/lib/intel64:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/../tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/lib/intel64:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/../tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/libfabric/lib:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib/release:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin:/usr/local/lib:/usr/local/ucx/lib:/usr/local/xpmem/lib:',
+    'MIC_LD_LIBRARY_PATH':'/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin_mic',
+    'PYTHONPATH':'/usr/local/lib:',
+    'MANPATH':'/opt/intel/psxe_runtime_2020.0.8/linux/mpi/man:/usr/local/man:/usr/local/share/man:/usr/share/man',
+    'PATH':'/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/libfabric/bin:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/bin:/opt/intel/psxe_runtime_2020.0.8/linux/bin:/usr/local/bin:/usr/local/ucx/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    'PKG_CONFIG_PATH':'/opt/intel/psxe_runtime_2020.0.8/linux/mkl/bin/pkgconfig',
+    'I_MPI_ROOT':'/opt/intel/psxe_runtime_2020.0.8/linux/mpi',
+    'IPPROOT':'/opt/intel/psxe_runtime_2020.0.8/linux/ipp',
+    'DAALROOT':'/opt/intel/psxe_runtime_2020.0.8/linux/daal',
+    'MKLROOT':'/opt/intel/psxe_runtime_2020.0.8/linux/mkl',
+    'TBBROOT':'/opt/intel/psxe_runtime_2020.0.8/linux/tbb'})
