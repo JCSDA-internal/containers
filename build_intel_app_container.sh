@@ -33,7 +33,7 @@ fi
 # Stop if anything goes wrong
 set -e
 
-echo "Building Intel development container " 
+echo "Building Intel application container " 
 
 echo "=============================================================="
 echo "   Building Docker Image"

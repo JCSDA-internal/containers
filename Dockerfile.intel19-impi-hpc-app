@@ -206,19 +206,19 @@ RUN apt-get update && \
 ENV LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en
 
-ENV BOOST_ROOT=/usr/local \
+ENV BOOST_ROOT=/usr/local/jedi \
     CC=mpiicc \
     CXX=mpiicpc \
-    EIGEN3_INCLUDE_DIR=/usr/local \
+    EIGEN3_INCLUDE_DIR=/usr/local/jedi \
     FC=mpiifort \
-    HDF5_ROOT=/usr/local \
+    HDF5_ROOT=/usr/local/jedi \
     MPI_CC=mpiicc \
     MPI_CXX=mpiicpc \
     MPI_FC=mpiifort \
-    NETCDF=/usr/local \
-    NETCDF_ROOT=/usr/local \
-    PIO=/usr/local \
-    PNETCDF=/usr/local \
+    NETCDF=/usr/local/jedi \
+    NETCDF_ROOT=/usr/local/jedi \
+    PIO=/usr/local/jedi \
+    PNETCDF=/usr/local/jedi \
     SERIAL_CC=icc \
     SERIAL_CXX=icpc \
     SERIAL_FC=ifort
@@ -227,7 +227,7 @@ RUN cd /root && \
     git clone https://github.com/jcsda/jedi-stack.git && \
     cd jedi-stack/buildscripts && \
     git checkout feature/intel-hpc-container && \
-    ./build_stack.sh "container-intel-impi-dev" && \
+    ./build_stack.sh "container-intel-impi-app" && \
     mv ../jedi-stack-contents.log /etc && \
     chmod a+r /etc/jedi-stack-contents.log && \
     rm -rf /root/jedi-stack && \
@@ -391,9 +391,9 @@ COPY --from=0 /usr/local/ucx /usr/local/ucx
 ENV LD_LIBRARY_PATH=/usr/local/ucx/lib:$LD_LIBRARY_PATH \
     PATH=/usr/local/ucx/bin:$PATH
 
-COPY --from=build /usr/local /usr/local
+COPY --from=build /usr/local/jedi /usr/local/jedi
 
-COPY --from=build /jedi /jedi
+COPY --from=build /jedi/build /jedi/build
 
 RUN echo "export PATH=/usr/local/bin:$PATH" >> /etc/bash.bashrc && \
     echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc && \
@@ -408,31 +408,3 @@ RUN apt-get update -y && \
         man-db \
         openssh-client && \
     rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /root/tmp && \
-    cd /root/tmp && \
-    wget  https://apt.repos.intel.com/2020/GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020 && \
-    apt-key add GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020 && \
-    rm GPG-PUB-KEY-INTEL-PSXE-RUNTIME-2020 && \
-    echo "deb https://apt.repos.intel.com/2020 intel-psxe-runtime main" >> /etc/apt/sources.list.d/hpccm.list && \
-    apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends aptitude && \
-    aptitude install -y --without-recommends -o Aptitude::ProblemResolver::SolutionCost='100*canceled-actions,200*removals' intel-icc-runtime=2020.0-8 intel-ifort-runtime=2020-8 intel-mkl-runtime=2020.0-8 intel-mpi-runtime=2020.0-8 && \
-    rm -rf /var/lib/apt/lists/*
-
-ENV CLASSPATH=/opt/intel/psxe_runtime_2020.0.8/linux/daal/lib/daal.jar:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib/mpi.jar \
-    CPATH=/opt/intel/psxe_runtime_2020.0.8/linux/daal/include:/opt/intel/psxe_runtime_2020.0.8/linux/mkl/include:/opt/intel/psxe_runtime_2020.0.8/linux/tbb/include:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/include:/usr/local/xpmem/include:/usr/local/knem/include: \
-    DAALROOT=/opt/intel/psxe_runtime_2020.0.8/linux/daal \
-    FI_PROVIDER_PATH=/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/libfabric/lib/prov \
-    IPPROOT=/opt/intel/psxe_runtime_2020.0.8/linux/ipp \
-    I_MPI_ROOT=/opt/intel/psxe_runtime_2020.0.8/linux/mpi \
-    LD_LIBRARY_PATH=/opt/intel/psxe_runtime_2020.0.8/linux/daal/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/mkl/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/lib/intel64:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/../tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/libfabric/lib:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib/release:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin:/usr/local/lib:/usr/local/ucx/lib:/usr/local/xpmem/lib: \
-    LIBRARY_PATH=/opt/intel/psxe_runtime_2020.0.8/linux/daal/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/mkl/lib/intel64_lin:/opt/intel/psxe_runtime_2020.0.8/linux/tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/lib/intel64:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/../tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/lib/intel64:/opt/intel/psxe_runtime_2020.0.8/linux/ipp/../tbb/lib/intel64/gcc4.8:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/libfabric/lib:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib/release:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/lib:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin:/usr/local/lib:/usr/local/ucx/lib:/usr/local/xpmem/lib: \
-    MANPATH=/opt/intel/psxe_runtime_2020.0.8/linux/mpi/man:/usr/local/man:/usr/local/share/man:/usr/share/man \
-    MIC_LD_LIBRARY_PATH=/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin_mic \
-    MKLROOT=/opt/intel/psxe_runtime_2020.0.8/linux/mkl \
-    NLSPATH=/opt/intel/psxe_runtime_2020.0.8/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/psxe_runtime_2020.0.8/linux/compiler/lib/intel64_lin/locale/%l_%t/%N \
-    PATH=/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/libfabric/bin:/opt/intel/psxe_runtime_2020.0.8/linux/mpi/intel64/bin:/opt/intel/psxe_runtime_2020.0.8/linux/bin:/usr/local/bin:/usr/local/ucx/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    PKG_CONFIG_PATH=/opt/intel/psxe_runtime_2020.0.8/linux/mkl/bin/pkgconfig \
-    PYTHONPATH=/usr/local/lib: \
-    TBBROOT=/opt/intel/psxe_runtime_2020.0.8/linux/tbb
