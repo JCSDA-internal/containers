@@ -121,41 +121,4 @@ Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m
     'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
     'chown -R jedi:jedi ~jedi/.gitconfig'])
 
-
-# build private repos
-
-# this needs to be processed with SED - hpccm does not offer a means for
-# generating a docker SHELL block
-Stage0 += shell(commands=['DOCKERSHELL BASH'])
-
-Stage0 += environment(variables={'CC':'mpiicc',
-                                 'CXX':'mpiicpc',
-                                 'FC':'mpiifort'})
-
-Stage0 += copy(src='ssh-key/github_academy_rsa', dest='/root/github_academy_rsa')
-
-Stage0 += shell(commands=['mkdir -p /root/.ssh',
-    'mv /root/github_academy_rsa /root/.ssh/github_academy_rsa',
-    'eval "$(ssh-agent -s)"',
-    'source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64',
-    'ssh-add /root/.ssh/github_academy_rsa',
-    'ssh -T -o "StrictHostKeyChecking=no" git@github.com; mkdir -p /root/jedi', 
-    'cd /root/jedi',
-    'git clone git@github.com:jcsda/odc.git',
-    'cd odc && git checkout develop',
-    'mkdir -p build && cd build',
-    'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
-    'make -j4', 'make install',
-    'echo "odc jcsda-develop" >> /etc/jedi-stack-contents.log',
-    'cd /root/jedi',
-    'git clone git@github.com:jcsda/odyssey.git',
-    'cd odyssey && git checkout develop',
-    'mkdir -p build && cd build',
-    'ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" ..',
-    'make -j4 && make install',
-    'echo "odyssey jcsda-develop" >> /etc/jedi-stack-contents.log',
-    'rm -rf /root/jedi/odc',
-    'rm -rf /root/jedi/odyssey',
-    'rm /root/.ssh/github_academy_rsa'])
-
 Stage0 += runscript(commands=['/bin/bash -l'])
