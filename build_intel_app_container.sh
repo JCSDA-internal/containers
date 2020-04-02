@@ -48,9 +48,6 @@ sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
 rm -f docker_build.log
 sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} ${INTEL_CONTEXT} 2>&1 | tee docker_build.log
 
-echo "exiting after building docker image"
-exit 0
-
 echo "=============================================================="
 echo "   Building Singularity Image"
 echo "=============================================================="

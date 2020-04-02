@@ -87,7 +87,7 @@ if [[ $ans == y ]] ; then
        singularity push jedi-${CNAME}_latest.sif library://jcsda/public/jedi-${CNAME}:revert
        rm jedi-${CNAME}_latest.sif
    else
-       echo "Not pushing to sylabs cloud"
+       echo "Not makeing backup image on sylabs cloud"
    fi
 
    echo "Building Singularity image"

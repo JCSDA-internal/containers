@@ -37,7 +37,7 @@ echo "=============================================================="
 echo "   Building Docker Image"
 echo "=============================================================="
 # create the Dockerfile
-../hpc-container-maker/hpccm.py --recipe ${CNAME}.py --format docker > Dockerfile.${CNAME}
+hpccm --recipe ${CNAME}.py --format docker > Dockerfile.${CNAME}
 
 # process the Dockerfile to change to bash shell
 sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
