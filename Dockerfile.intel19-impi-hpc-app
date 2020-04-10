@@ -246,11 +246,41 @@ RUN echo "export FC=mpiifort" >> /etc/bash.bashrc && \
     echo "export CPATH=/usr/local/include:/opt/jedi/include:$CPATH" >> /etc/bash.bashrc && \
     echo "export PYTHONPATH=/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc
 
-ENV LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local
+ENV LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local/lib:/opt/jedi/lib
 
 COPY ssh-key/github_academy_rsa /root/github_academy_rsa
 
 SHELL ["/bin/bash", "-c"]
+
+RUN source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64 && \
+    mkdir -p /root/.ssh && \
+    mv /root/github_academy_rsa /root/.ssh/github_academy_rsa && \
+    eval "$(ssh-agent -s)" && \
+    ssh-add /root/.ssh/github_academy_rsa && \
+    export CC=mpiicc && \
+    export CXX=mpiicpc && \
+    export FC=mpiifort && \
+    ssh -T -o "StrictHostKeyChecking=no" git@github.com; mkdir -p /opt/jedi/fv3-bundle && \
+    cd /opt/jedi/fv3-bundle && \
+    git clone git@github.com:jcsda/fv3-bundle.git && \
+    cd /opt/jedi/fv3-bundle/fv3-bundle && \
+    git clone git@github.com:jcsda/fckit.git -b develop && \
+    git clone git@github.com:jcsda/atlas.git -b develop && \
+    git clone git@github.com:jcsda/crtm.git -b develop && \
+    git clone git@github.com:jcsda/saber.git -b develop && \
+    git clone git@github.com:jcsda/oops.git -b develop && \
+    git clone git@github.com:jcsda/ioda.git -b develop && \
+    git clone git@github.com:jcsda/ufo.git -b develop && \
+    git clone git@github.com:jcsda/fms.git -b dev/master-ecbuild && \
+    git clone git@github.com:jcsda/femps.git -b develop && \
+    git clone git@github.com:jcsda/fv3-jedi-linearmodel.git -b develop fv3-jedi-lm && \
+    git clone git@github.com:jcsda/fv3-jedi.git -b develop && \
+    mkdir -p /opt/jedi/fv3-bundle/build && \
+    cd /opt/jedi/fv3-bundle/build && \
+    ecbuild --build=Release ../fv3-bundle && \
+    make -j4 && \
+    chmod -R 777 /opt/jedi/fv3-bundle && \
+    rm /root/.ssh/github_academy_rsa
 
 COPY ./hello_world_mpi.c /root/jedi/hello_world_mpi.c
 
