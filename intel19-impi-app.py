@@ -11,6 +11,16 @@ import os
 # Base image
 Stage0 += baseimage(image='ubuntu:18.04', _as='build')
 
+# get optional user arguments
+hpcstring = USERARG.get('hpc', 'False')
+mxofed = USERARG.get('mellanox', 'False')
+pmi0 = USERARG.get('pmi0', 'True')
+
+if (hpcstring.lower() == "true"):
+    hpc=True
+else:
+    hpc=False
+
 # first update apt keys
 bs = apt_get(ospackages=['build-essential','gnupg2','apt-utils'])
 Stage0 += bs
@@ -32,28 +42,35 @@ baselibs = apt_get(ospackages=['tcsh','csh','ksh','git','openssh-server',
                                'git-flow'])
 Stage0 += baselibs
 
-# Mellanox or inbox OFED
-#o = mlnx_ofed(version='4.5-1.0.1.0')
-o = ofed()
-Stage0 += o
+if (hpc):
 
-# PMI libraries
-p = apt_get(ospackages=['libpmi0','libpmi0-dev'])
-Stage0 += p
-pp = slurm_pmi2()
-Stage0 += pp
+    # Mellanox or inbox OFED
+    if (mxofed.lower() == "true"):
+        o = mlnx_ofed(version='4.5-1.0.1.0')
+    else:
+        o = ofed()
+    Stage0 += o
 
-# UCX and components
-kn = knem()
-Stage0 += kn
+    # PMI libraries
+    if (pmi0.lower() == "true"):
+        p = apt_get(ospackages=['libpmi0','libpmi0-dev'])
+        Stage0 += p
 
-x = xpmem()
-Stage0 += x
+    # always install pmi2 library for hpc
+    pp = slurm_pmi2()
+    Stage0 += pp
 
-u = ucx(ofed=True,knem=True,xpmem=True,cuda=False)
-Stage0 += u
+    # UCX and components
+    kn = knem()
+    Stage0 += kn
 
-# Install Intel compilers, mpi, and mkl 
+    x = xpmem()
+    Stage0 += x
+
+    u = ucx(ofed=True,knem=True,xpmem=True,cuda=False)
+    Stage0 += u
+
+# Install Intel compilers, mpi, and mkl
 Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='../intel_license/COM_L___LXMW-67CW6CHW.lic'),
                      tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz'),
                      psxevars=True)
@@ -103,10 +120,10 @@ Stage0 += environment(variables={'NETCDF':'/opt/jedi',
                                  'FC':'mpiifort'})
 
 # build the jedi stack
-Stage0 += shell(commands=['cd /root', 
+Stage0 += shell(commands=['cd /root',
     'git clone https://github.com/jcsda/jedi-stack.git',
     'cd jedi-stack/buildscripts',
-    'git checkout feature/intel-hpc-container',
+    'git checkout develop',
     './build_stack.sh "container-intel-impi-app"',
     'mv ../jedi-stack-contents.log /etc',
     'chmod a+r /etc/jedi-stack-contents.log',
@@ -175,12 +192,14 @@ Stage1 += baseimage(image='ubuntu:18.04', _as='runtime')
 Stage1 += bs
 Stage1 += k
 Stage1 += baselibs
-Stage1 += o.runtime()
-Stage1 += p
-Stage1 += pp.runtime()
-Stage1 += kn.runtime()
-Stage1 += x.runtime()
-Stage1 += u.runtime()
+if (hpc):
+    Stage1 += o.runtime()
+    if (pmi0):
+        Stage1 += p
+    Stage1 += pp.runtime()
+    Stage1 += kn.runtime()
+    Stage1 += x.runtime()
+    Stage1 += u.runtime()
 
 # set some environment variables for bash users
 Stage1 += shell(commands=['echo "export PATH=/usr/local/bin:/usr/local/jedi/bin:$PATH" >> /etc/bash.bashrc',
@@ -220,4 +239,3 @@ Stage1 += environment(variables={'LD_LIBRARY_PATH':'/opt/intel/psxe_runtime_2020
     'TBBROOT':'/opt/intel/psxe_runtime_2020.0.8/linux/tbb'})
 
 Stage1 += copy(_from='build', src='/opt/jedi', dest='/opt/jedi')
-
