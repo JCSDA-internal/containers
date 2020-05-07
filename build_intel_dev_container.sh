@@ -64,9 +64,6 @@ echo "=============================================================="
 echo "   Building Docker Image"
 echo "=============================================================="
 
-# process the Dockerfile to change to bash shell
-sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
-
 # build the Docker image
 cd ${INTEL_CONTEXT}
 ln -sf ../Dockerfile.${CNAME} .

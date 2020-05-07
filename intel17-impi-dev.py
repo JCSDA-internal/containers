@@ -121,5 +121,4 @@ Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m
     'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
     'chown -R jedi:jedi ~jedi/.gitconfig'])
 
-
 Stage0 += runscript(commands=['/bin/bash -l'])
