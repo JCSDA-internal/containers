@@ -1,5 +1,5 @@
 BootStrap: docker
-From: jcsda/docker-gnu-openmpi-dev:odc
+From: jcsda/docker-gnu-openmpi-dev:latest
 
 %labels
 MAINTAINER Mark Miesch
