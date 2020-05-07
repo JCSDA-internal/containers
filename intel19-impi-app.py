@@ -1,9 +1,8 @@
 """Intel/impi Development container
 
 Usage:
-$ hpccm --recipe intel19-impi-hpc-dev.py --format singularity > Singularity.intel19-impi-hpc-dev
-$ sed -i -e 's/\%post/\%post -c \/bin\/bash/g' Singularity.intel19-impi-hpc-dev
-$ sudo singularity build ./intel19-impi-hpc-dev.sif Singularity.intel19-impi-hpc-dev
+$ hpccm --recipe intel19-impi-app.py --format docker > Dockerfile.intel19-impi-app
+$ sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
 """
 
 import os
