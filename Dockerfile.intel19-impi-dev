@@ -1,4 +1,4 @@
-FROM ubuntu:18.04 AS stage0
+FROM ubuntu:18.04
 
 RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -63,11 +63,14 @@ RUN echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh in
 # CMake version 3.13.0
 RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        make \
         wget && \
     rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://cmake.org/files/v3.13/cmake-3.13.0-Linux-x86_64.sh && \
+    mkdir -p /usr/local && \
     /bin/sh /var/tmp/cmake-3.13.0-Linux-x86_64.sh --prefix=/usr/local --skip-license && \
     rm -rf /var/tmp/cmake-3.13.0-Linux-x86_64.sh
+ENV PATH=/usr/local/bin:$PATH
 
 RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -151,39 +154,6 @@ RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
     chown -R jedi:jedi ~jedi/.gitconfig
 
 ENV LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local
-
-SHELL ["/bin/bash", "-c"]
-
-ENV CC=mpiicc \
-    CXX=mpiicpc \
-    FC=mpiifort
-
-COPY ssh-key/github_academy_rsa /root/github_academy_rsa
-
-RUN mkdir -p /root/.ssh && \
-    mv /root/github_academy_rsa /root/.ssh/github_academy_rsa && \
-    eval "$(ssh-agent -s)" && \
-    source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64 && \
-    ssh-add /root/.ssh/github_academy_rsa && \
-    ssh -T -o "StrictHostKeyChecking=no" git@github.com; mkdir -p /root/jedi && \
-    cd /root/jedi && \
-    git clone git@github.com:jcsda/odc.git && \
-    cd odc && git checkout develop && \
-    echo "odc develop" >> /etc/jedi-stack-contents.log && \
-    mkdir -p build && cd build && \
-    ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
-    make -j4 && \
-    make install && \
-    cd /root/jedi && \
-    git clone git@github.com:jcsda/odyssey.git && \
-    cd odyssey && git checkout develop && \
-    mkdir -p build && cd build && \
-    ecbuild --build=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .. && \
-    make -j4 && make install && \
-    echo "odyssey develop" >> /etc/jedi-stack-contents.log && \
-    rm -rf /root/jedi/odc && \
-    rm -rf /root/jedi/odyssey && \
-    rm /root/.ssh/github_academy_rsa
 
 ENTRYPOINT ["/bin/bash", "-l"]
 

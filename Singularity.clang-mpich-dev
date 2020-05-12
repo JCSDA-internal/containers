@@ -6,8 +6,6 @@ MAINTAINER Mark Miesch
 SPECIES JEDI
 
 %environment
-    DISPLAY=:0.0
-    export DISPLAY
     TERM=xterm
     export TERM
     GIT_MERGE_AUTOEDIT=no

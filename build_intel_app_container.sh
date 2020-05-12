@@ -16,12 +16,14 @@ function get_ans {
 # It will create a docker container and optionally also a Charliecloud and
 # a singularity container as well
 
+set -ex
+
 if [[ $# -lt 1 ]]; then
    echo "usage: build_intel_app_container.sh <name> <tag> <hpc>"
    exit 1
 fi
 
-CNAME=${1:-"intel19-impi-dev"}
+CNAME=${1:-"intel19-impi-app"}
 TAG=${2:-"latest"}
 HPC=${3:-"0"}
 
@@ -36,7 +38,7 @@ fi
 # Stop if anything goes wrong
 set -e
 
-echo "Building Intel development container "
+echo "Building Intel application container "
 
 # create the Dockerfile
 case ${HPC} in
@@ -56,7 +58,7 @@ case ${HPC} in
         ;;
     *)
         echo "ERROR: unsupported HPC option"
-	      exit 1
+	exit 1
         ;;
 esac
 
@@ -64,47 +66,15 @@ echo "=============================================================="
 echo "   Building Docker Image"
 echo "=============================================================="
 
+# process the Dockerfile to change to bash shell
+sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
+
 # build the Docker image
-cd ${INTEL_CONTEXT}
-ln -sf ../Dockerfile.${CNAME} .
-#sudo docker image build --no-cache -f Dockerfile.${CNAME} -t jedi-${CNAME} .
-sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME} .
-
-# save the Docker image to a file:
-cd ..
-mkdir -p containers
-sudo docker save jedi-${CNAME}:latest | gzip > containers/docker-${CNAME}.tar.gz
-
-# Optionally copy to amazon S3
-get_ans "Send Docker container to AWS S3?"
-if [[ $ans == y ]] ; then
-  echo "Sending to Amazon S3"
-  aws s3 mv s3://privatecontainers/docker-jedi-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-revert.tar.gz
-  aws s3 cp containers/docker-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}.tar.gz
-else
-  echo "Not sending to Amazon S3"
-fi
+rm -f docker_build.log
+sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME}:${TAG} ${INTEL_CONTEXT} 2>&1 | tee docker_build.log
 
 echo "=============================================================="
-echo "   Building Charliecloud Image"
+echo "   Building Singularity Image"
 echo "=============================================================="
-
-# build the Charliecloud image
-get_ans "Build Charliecloud image?"
-if [[ $ans == y ]] ; then
-    echo "Building Charliecloud image"
-    sudo ch-builder2tar jedi-${CNAME} containers
-
-    # Optionally copy to amazon S3
-    get_ans "Push Charliecloud container to AWS S3?"
-    if [[ $ans == y ]] ; then
-      echo "Sending to Amazon S3"
-      aws s3 cp s3://privatecontainers/ch-jedi-${CNAME}.tar.gz s3://privatecontainers/ch-jedi-${CNAME}-revert.tar.gz
-      aws s3 cp containers/jedi-${CNAME}.tar.gz s3://privatecontainers/ch-jedi-${CNAME}.tar.gz
-    else
-      echo "Not sending to Amazon S3"
-    fi
-
-else
-    echo "Not Building Charliecloud image"
-fi
+rm -f singularity_build.log
+sudo singularity build containers/jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:${TAG} 2>&1 | tee singularity_build.log

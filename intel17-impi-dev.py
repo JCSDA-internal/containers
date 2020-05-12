@@ -20,11 +20,11 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh','lsb-release'
 # Mellanox OFED
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
-# Install Intel compilers, mpi, and mkl 
+# Install Intel compilers, mpi, and mkl
 Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='intel_license/COM_L___LXMW-67CW6CHW.lic'),
                      tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2017_update1.tgz'),
                      psxevars=True, components=['intel-icc-l-all__x86_64',
-                     'intel-ifort-l-ps__x86_64', 'intel-mkl__x86_64', 
+                     'intel-ifort-l-ps__x86_64', 'intel-mkl__x86_64',
                      'intel-mkl-rt__x86_64',
                      'intel-mkl-ps-rt-jp__x86_64',
                      'intel-mkl-ps-cluster-64bit__x86_64',
@@ -49,7 +49,7 @@ Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='
 # get an up-to-date version of CMake
 Stage0 += cmake(eula=True,version="3.13.0")
 
-# editors, document tools, git, and git-flow                   
+# editors, document tools, git, and git-flow
 Stage0 += apt_get(ospackages=['emacs','vim','nedit','graphviz','doxygen',
                               'texlive-latex-recommended','texinfo',
                               'lynx','git','git-flow'])
@@ -95,10 +95,10 @@ Stage0 += environment(variables={'NETCDF':'/usr/local',
                                  'FC':'mpiifort'})
 
 # build the jedi stack
-Stage0 += shell(commands=['cd /root', 
+Stage0 += shell(commands=['cd /root',
     'git clone https://github.com/jcsda/jedi-stack.git',
     'cd jedi-stack/buildscripts',
-    'git checkout bugfix/intel17-container',
+    'git checkout develop',
     './build_stack.sh "container-intel-impi-dev"',
     'mv ../jedi-stack-contents.log /etc',
     'chmod a+r /etc/jedi-stack-contents.log',
