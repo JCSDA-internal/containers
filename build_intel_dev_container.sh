@@ -56,7 +56,7 @@ case ${HPC} in
         ;;
     *)
         echo "ERROR: unsupported HPC option"
-	exit 1
+	      exit 1
         ;;
 esac
 
