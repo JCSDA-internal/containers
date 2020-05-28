@@ -2,6 +2,7 @@ FROM ubuntu:18.04
 
 RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        apt-utils \
         bc \
         bison \
         build-essential \
@@ -23,6 +24,7 @@ RUN apt-get update -y && \
         libssl-dev \
         libx11-dev \
         libxml2-dev \
+        linux-headers-aws \
         lsb-release \
         man-db \
         nano \
@@ -48,17 +50,22 @@ RUN apt-get update -y && \
         build-essential \
         cpio && \
     rm -rf /var/lib/apt/lists/*
-COPY ./intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz
+COPY ./intel_tarballs/parallel_studio_xe_2020_update1_cluster_edition_online.tgz /var/tmp/parallel_studio_xe_2020_update1_cluster_edition_online.tgz
 COPY ./intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
-RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz -C /var/tmp -z && \
-    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc__x86_64;intel-ifort__x86_64;intel-mkl-core__x86_64;intel-ifort-common__noarch;intel-icx__x86_64;intel-icc-common__noarch;intel-icc-common-ps__noarch;intel-mkl-cluster__x86_64;intel-mkl-gnu__x86_64;intel-mkl-doc__noarch;intel-mkl-doc-ps__noarch;intel-mkl-common-ps__noarch;intel-mkl-core-ps__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-common__noarch;intel-mkl-core-f__x86_64;intel-mkl-gnu-f__x86_64;intel-mkl-f95-common__noarch;intel-mkl-f__x86_64;intel-mkl-common-f__noarch;intel-mkl-cluster-c__noarch;intel-mkl-common-c-ps__noarch;intel-mkl-core-c__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-common-c__noarch;intel-mpi-rt__x86_64;intel-mpi-sdk__x86_64;intel-mpi-installer-license__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-mkl-psxe__noarch;intel-ippcp-psxe__noarch;intel-psxe-common__noarch;intel-ippcp-psxe__noarch;intel-psxe-licensing__noarch;intel-icsxe-pset;intel-icsxe__noarch;intel-imb__x86_64;intel-ips__noarch;intel-ipsc__noarch;intel-ipsf__noarch;intel-openmp__x86_64;intel-openmp-common__noarch;intel-openmp-common-icc__noarch;intel-openmp-common-ifort__noarch;intel-openmp-ifort__x86_64;intel-comp__x86_64;intel-comp-l-all-common__noarch;intel-comp-l-all-vars__noarch;intel-comp-nomcu-vars__noarch;intel-comp-ps__x86_64;intel-comp-ps-ss__x86_64;intel-comp-ps-ss-bec__x86_64;intel-comp-ps-ss-bec-32bit__x86_64/g' \
+RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2020_update1_cluster_edition_online.tgz -C /var/tmp -z && \
+    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc__x86_64;intel-ifort__x86_64;intel-mkl-core__x86_64;intel-ifort-common__noarch;intel-icx__x86_64;intel-icc-common__noarch;intel-icc-common-ps__noarch;intel-mkl-cluster__x86_64;intel-mkl-gnu__x86_64;intel-mkl-doc__noarch;intel-mkl-doc-ps__noarch;intel-mkl-common-ps__noarch;intel-mkl-core-ps__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-common__noarch;intel-mkl-core-f__x86_64;intel-mkl-gnu-f__x86_64;intel-mkl-f95-common__noarch;intel-mkl-f__x86_64;intel-mkl-common-f__noarch;intel-mkl-cluster-c__noarch;intel-mkl-common-c-ps__noarch;intel-mkl-core-c__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-common-c__noarch;intel-mpi-rt__x86_64;intel-mpi-sdk__x86_64;intel-mpi-installer-license__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-mkl-psxe__noarch;intel-ippcp-psxe__noarch;intel-psxe-common__noarch;intel-ippcp-psxe__noarch;intel-psxe-licensing__noarch;intel-icsxe-pset;intel-icsxe__noarch;intel-imb__x86_64;intel-ips__noarch;intel-ipsc__noarch;intel-ipsf__noarch;intel-openmp__x86_64;intel-openmp-common__noarch;intel-openmp-common-icc__noarch;intel-openmp-common-ifort__noarch;intel-openmp-ifort__x86_64;intel-comp__x86_64;intel-comp-l-all-common__noarch;intel-comp-l-all-vars__noarch;intel-comp-nomcu-vars__noarch;intel-comp-ps__x86_64;intel-comp-ps-ss-bec__x86_64/g' \
         -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
         -e 's/^#\?\(ACCEPT_EULA\)=.*/\1=accept/g' \
         -e 's/^#\?\(ACTIVATION_TYPE\)=.*/\1=license_file/g' \
-        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2019_update5_cluster_edition/silent.cfg && \
-    cd /var/tmp/parallel_studio_xe_2019_update5_cluster_edition && ./install.sh --silent=silent.cfg && \
-    rm -rf /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition
+        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2020_update1_cluster_edition_online/silent.cfg && \
+    cd /var/tmp/parallel_studio_xe_2020_update1_cluster_edition_online && ./install.sh --silent=silent.cfg && \
+    rm -rf /var/tmp/parallel_studio_xe_2020_update1_cluster_edition_online.tgz /var/tmp/parallel_studio_xe_2020_update1_cluster_edition_online
 RUN echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
+
+RUN rm -rf /opt/intel/advisor* /opt/intel/vtune* /opt/intel/inspector* && \
+    rm -rf /opt/intel/ide_support_2020 /opt/intel/performance_snapshot /opt/intel/conda_channel && \
+    rm -rf /opt/intel/compilers_and_libraries_2020/linux/lib/ia32* && \
+    rm -rf /opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/lib/ia32*
 
 # CMake version 3.13.0
 RUN apt-get update -y && \
@@ -133,7 +140,7 @@ ENV BOOST_ROOT=/usr/local \
 RUN cd /root && \
     git clone https://github.com/jcsda/jedi-stack.git && \
     cd jedi-stack/buildscripts && \
-    git checkout develop && \
+    git checkout feature/new-containers && \
     ./build_stack.sh "container-intel-impi-dev" && \
     mv ../jedi-stack-contents.log /etc && \
     chmod a+r /etc/jedi-stack-contents.log && \

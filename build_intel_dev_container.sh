@@ -29,7 +29,7 @@ if [[ $(echo ${CNAME} | cut -d- -f1) = "intel17" ]]; then
     export INTEL_TARBALL='./intel_tarballs/parallel_studio_xe_2017_update1.tgz'
     export INTEL_CONTEXT='./context17'
 elif [[ $(echo ${CNAME} | cut -d- -f1) = "intel19" ]]; then
-    export INTEL_TARBALL='./intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz'
+    export INTEL_TARBALL='./intel_tarballs/parallel_studio_xe_2020_update1_cluster_edition_online.tgz'
     export INTEL_CONTEXT='./context19'
 fi
 
