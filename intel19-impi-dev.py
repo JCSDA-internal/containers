@@ -90,7 +90,7 @@ if (reduced_size.lower() == "true"):
              'rm -rf /opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/lib/ia32*'])
 
 ## get an up-to-date version of CMake
-Stage0 += cmake(eula=True,version="3.13.0")
+Stage0 += cmake(eula=True,version="3.17.2")
 
 ## editors, document tools, git, and git-flow                   
 Stage0 += apt_get(ospackages=['emacs','vim','nedit','graphviz','doxygen',

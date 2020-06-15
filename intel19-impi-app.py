@@ -75,7 +75,7 @@ Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='
                      psxevars=True)
 
 ## get an up-to-date version of CMake
-Stage0 += cmake(eula=True,version="3.13.0")
+Stage0 += cmake(eula=True,version="3.17.2")
 
 ## git-lfs
 Stage0 += shell(commands=
