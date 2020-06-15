@@ -9,6 +9,9 @@ import os
 # Base image
 Stage0.baseimage('ubuntu:18.04')
 
+# get optional user arguments
+reduced_size = USERARG.get('reduced', 'True')
+
 Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh','git',
                               'openssh-server','libncurses-dev','libssl-dev',
                               'libx11-dev','less','man-db','tk','tcl','swig',
@@ -17,7 +20,7 @@ Stage0 += apt_get(ospackages=['build-essential','tcsh','csh','ksh','git',
                               'libcurl4-openssl-dev','nano','screen', 'libasound2',
                               'libgtk2.0-common','software-properties-common',
                               'libpango-1.0.0','xserver-xorg','dirmngr',
-                              'gnupg2','lsb-release'])
+                              'gnupg2','lsb-release','apt-utils','linux-headers-aws'])
 
 # update apt keys
 Stage0 += shell(commands=['apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157',
@@ -27,7 +30,7 @@ Stage0 += shell(commands=['apt-key adv --keyserver keyserver.ubuntu.com --recv-k
 
 # Install Intel compilers, mpi, and mkl 
 Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='../intel_license/COM_L___LXMW-67CW6CHW.lic'),
-                     tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz'),
+                     tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2020_update1_cluster_edition_online.tgz'),
                      psxevars=True, components=['intel-icc__x86_64',
                       'intel-ifort__x86_64', 'intel-mkl-core__x86_64',
                       'intel-ifort-common__noarch',
@@ -77,13 +80,17 @@ Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='
                       'intel-comp-l-all-vars__noarch',
                       'intel-comp-nomcu-vars__noarch',
                       'intel-comp-ps__x86_64',
-                      'intel-comp-ps-ss__x86_64',
-                      'intel-comp-ps-ss-bec__x86_64',
-                      'intel-comp-ps-ss-bec-32bit__x86_64',
-])
+                      'intel-comp-ps-ss-bec__x86_64'])
+
+# component specification still isn't working so delete directories manually
+if (reduced_size.lower() == "true"):
+   Stage0 += shell(commands=['rm -rf /opt/intel/advisor* /opt/intel/vtune* /opt/intel/inspector*',
+             'rm -rf /opt/intel/ide_support_2020 /opt/intel/performance_snapshot /opt/intel/conda_channel',
+             'rm -rf /opt/intel/compilers_and_libraries_2020/linux/lib/ia32*',
+             'rm -rf /opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/lib/ia32*'])
 
 ## get an up-to-date version of CMake
-Stage0 += cmake(eula=True,version="3.13.0")
+Stage0 += cmake(eula=True,version="3.17.2")
 
 ## editors, document tools, git, and git-flow                   
 Stage0 += apt_get(ospackages=['emacs','vim','nedit','graphviz','doxygen',
