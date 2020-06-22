@@ -14,8 +14,7 @@ fi
 CNAME=${1:-"gnu-openmpi-dev"}
 TAG=${2:-"ecsync"}
 
-if [[ $(echo ${CNAME} | cut -d- -f1) = "intel19" ]]; then
-#if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel*" ]]; then
+if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
 
   echo "Sending to Amazon S3"
   aws s3 mv s3://privatecontainers/docker-jedi-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-revert.tar.gz
