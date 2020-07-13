@@ -1,4 +1,8 @@
 #!/bin/bash
+# © Copyright 2020-2020 UCAR
+# This software is licensed under the terms of the Apache Licence Version 2.0 which can be obtained at
+# http://www.apache.org/licenses/LICENSE-2.0.
+
 
 #------------------------------------------------------------------------
 function get_ans {
@@ -83,6 +87,23 @@ if [[ $ans == y ]] ; then
   aws s3 cp containers/docker-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}.tar.gz
 else
   echo "Not sending to Amazon S3"
+fi
+
+echo "=============================================================="
+echo "   Building Singularity Image"
+echo "=============================================================="
+# Optionally build the Singularity image
+get_ans "Build Singularity image?"
+if [[ $ans == y ]] ; then
+    echo "Building Singularity image"
+    rm -f singularity_build.log
+    sudo singularity build containers/jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:${TAG} 2>&1 | tee singularity_build.log
+
+    get_ans "Push Singularity image to S3 and backup existing version?"
+    if [[ $ans == y ]] ; then
+       aws s3 mv s3://privatecontainers/jedi-${CNAME}.sif s3://privatecontainers/jedi-${CNAME}-revert.tar.gz
+       aws s3 cp containers/jedi-${CNAME}.sif s3://privatecontainers/jedi-${CNAME}.sif
+    fi
 fi
 
 echo "=============================================================="
