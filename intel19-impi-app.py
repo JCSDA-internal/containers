@@ -75,7 +75,7 @@ if (hpc):
     Stage0 += u
 
 # Install Intel compilers, mpi, and mkl
-Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='../intel_license/COM_L___LXMW-67CW6CHW.lic'),
+Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE'),
                      tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz'),
                      psxevars=True)
 

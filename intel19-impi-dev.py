@@ -34,8 +34,8 @@ Stage0 += shell(commands=['apt-key adv --keyserver keyserver.ubuntu.com --recv-k
 #Stage0 += mlnx_ofed(version='4.5-1.0.1.0')
 
 # Install Intel compilers, mpi, and mkl 
-Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='../intel_license/COM_L___LXMW-67CW6CHW.lic'),
-                     tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2020_update1_cluster_edition_online.tgz'),
+Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE'),
+                     tarball=os.getenv('INTEL_TARBALL',default='intel_tarballs/parallel_studio_xe_2020_cluster_edition.tgz'),
                      psxevars=True, components=['intel-icc__x86_64',
                       'intel-ifort__x86_64', 'intel-mkl-core__x86_64',
                       'intel-ifort-common__noarch',
@@ -85,7 +85,12 @@ Stage0 += intel_psxe(eula=True, license=os.getenv('INTEL_LICENSE_FILE',default='
                       'intel-comp-l-all-vars__noarch',
                       'intel-comp-nomcu-vars__noarch',
                       'intel-comp-ps__x86_64',
-                      'intel-comp-ps-ss-bec__x86_64'])
+                      'intel-comp-ps-ss-bec__x86_64',
+                      'intel-gdb__x86_64',
+                      'intel-gdb-source__noarch',
+                      'intel-gdb-common__noarch',
+                      'intel-gdb-common-ps__noarch'
+])
 
 # component specification still isn't working so delete directories manually
 if (reduced_size.lower() == "true"):
@@ -167,6 +172,7 @@ Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m
     'chown -R jedi:jedi ~jedi/.gitconfig'])
 
 # this appears to be needed to avoid a bootup error message for docker run
-Stage0 += environment(variables={'LD_LIBRARY_PATH':'/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_lin:/usr/local'})
+Stage0 += environment(variables={'LD_LIBRARY_PATH':'/opt/intel/compilers_and_libraries_2020.0.166/linux/compiler/lib/intel64_lin:/usr/local'})
+
 
 Stage0 += runscript(commands=['/bin/bash -l'])
