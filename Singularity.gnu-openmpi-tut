@@ -25,26 +25,32 @@ SPECIES JEDI
     eval "$(ssh-agent -s)"
     ssh-add /root/.ssh/github_academy_rsa
     ssh -T -o "StrictHostKeyChecking=no" git@github.com || mkdir -p /opt/jedi
+    git config --global credential.helper 'cache --timeout=3600'
+    git config --global --add credential.helper 'store'
+    git lfs install
     cd /opt/jedi
     git clone git@github.com:jcsda/fv3-bundle.git
     cd fv3-bundle
     git checkout develop
-    git clone git@github.com:jcsda/jedi-cmake.git
-    git clone git@github.com:jcsda-internal/fckit.git
-    git clone git@github.com:jcsda-internal/atlas.git
-    git clone git@github.com:jcsda/crtm.git
-    git clone git@github.com:jcsda/oops.git
-    git clone git@github.com:jcsda/saber.git
-    git clone git@github.com:jcsda/ioda.git
-    git clone git@github.com:jcsda/ufo.git
-    git clone git@github.com:jcsda/FMS.git
-    git clone git@github.com:jcsda/GFDL_atmos_cubed_sphere.git
-    git clone git@github.com:jcsda/femps.git
-    git clone git@github.com:jcsda/fv3-jedi-linearmodel.git
-    git clone git@github.com:jcsda/fv3-jedi.git
+    sed -i -e 's/UPDATE //g' CMakeLists.txt
+    cat CMakeLists.txt
+    git clone git@github.com:jcsda/jedi-cmake.git -b develop
+    git clone git@github.com:jcsda-internal/fckit.git -b develop
+    git clone git@github.com:jcsda-internal/atlas.git -b develop
+    git clone git@github.com:jcsda/crtm.git -b develop
+    git clone git@github.com:jcsda/oops.git -b develop
+    git clone git@github.com:jcsda/saber.git -b develop
+    git clone git@github.com:jcsda/ioda.git -b develop
+    git clone git@github.com:jcsda/ufo.git -b develop
+    git clone git@github.com:jcsda/FMS.git -b release-stable-ecbuild
+    git clone git@github.com:jcsda/GFDL_atmos_cubed_sphere.git -b release-stable
+    git clone git@github.com:jcsda/femps.git -b develop
+    git clone git@github.com:jcsda/fv3-jedi-linearmodel.git -b develop
+    git clone git@github.com:jcsda/fv3-jedi.git -b develop
     mkdir -p /opt/jedi/build
     cd /opt/jedi/build
     ecbuild --build=Release ../fv3-bundle
+    make -j4
     rm /root/.ssh/github_academy_rsa
     rm -rf /var/lib/apt/lists/*
 
