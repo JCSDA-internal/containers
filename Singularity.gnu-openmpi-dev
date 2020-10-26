@@ -45,7 +45,9 @@ SPECIES JEDI
     ssh -T -o "StrictHostKeyChecking=no" git@github.com || mkdir -p /opt/jedi
     cd /opt/jedi
     git clone git@github.com:jcsda-internal/ioda-plots.git
-    /usr/local/miniconda3/bin/pip install -e ioda-plots
+    cd ioda-plots
+    git checkout feature/cris
+    /usr/local/miniconda3/bin/pip install -e .
     rm /root/.ssh/github_academy_rsa
     rm -rf /var/lib/apt/lists/*
 
