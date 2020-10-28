@@ -15,11 +15,13 @@ SPECIES JEDI
     export GIT_MERGE_AUTOEDIT
     export LANG=en_US.UTF-8
     export LANGUAGE=en_US:en
-    export PATH=/usr/local/bin:/usr/local/miniconda3/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/PanoplyJ
+    export PATH=/usr/local/bin:/usr/local/miniconda3/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/jedi/build/bin:/opt/PanoplyJ
     alias pip=/usr/local/miniconda3/bin/pip
 
 %post
     echo "Hello from inside the container"
+    apt-get update
+    apt-get install -y --no-install-recommends mesa-utils libgl1-mesa-glx
     mkdir -p /root/.ssh
     mv /root/github_academy_rsa /root/.ssh/github_academy_rsa
     eval "$(ssh-agent -s)"
@@ -31,13 +33,13 @@ SPECIES JEDI
     cd /opt/jedi
     git clone git@github.com:jcsda/fv3-bundle.git
     cd fv3-bundle
-    git checkout develop
+    git checkout feature/tutorial-setup
     sed -i -e 's/UPDATE //g' CMakeLists.txt
     cat CMakeLists.txt
     git clone git@github.com:jcsda/jedi-cmake.git -b develop
     git clone git@github.com:jcsda-internal/fckit.git -b develop
     git clone git@github.com:jcsda-internal/atlas.git -b develop
-    git clone git@github.com:jcsda/crtm.git -b develop
+    git clone git@github.com:jcsda/crtm.git -b release/crtm_jedi
     git clone git@github.com:jcsda/oops.git -b develop
     git clone git@github.com:jcsda/saber.git -b develop
     git clone git@github.com:jcsda/ioda.git -b develop
@@ -51,6 +53,7 @@ SPECIES JEDI
     cd /opt/jedi/build
     ecbuild --build=Release ../fv3-bundle
     make -j4
+    ctest -R get_
     rm /root/.ssh/github_academy_rsa
     rm -rf /var/lib/apt/lists/*
 
