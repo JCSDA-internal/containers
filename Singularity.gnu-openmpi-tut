@@ -31,7 +31,7 @@ SPECIES JEDI
     cd /opt/jedi
     git clone git@github.com:jcsda/fv3-bundle.git
     cd fv3-bundle
-    git checkout develop
+    git checkout feature/tutorial-setup
     sed -i -e 's/UPDATE //g' CMakeLists.txt
     cat CMakeLists.txt
     git clone git@github.com:jcsda/jedi-cmake.git -b develop
