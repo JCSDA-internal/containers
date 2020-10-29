@@ -31,24 +31,12 @@ SPECIES JEDI
     git config --global --add credential.helper 'store'
     git lfs install
     cd /opt/jedi
-    git clone git@github.com:jcsda/fv3-bundle.git
+    git clone git@github.com:jcsda-internal/fv3-bundle.git
     cd fv3-bundle
-    git checkout feature/tutorial-setup
-    sed -i -e 's/UPDATE //g' CMakeLists.txt
-    cat CMakeLists.txt
-    git clone git@github.com:jcsda/jedi-cmake.git -b develop
-    git clone git@github.com:jcsda-internal/fckit.git -b develop
-    git clone git@github.com:jcsda-internal/atlas.git -b develop
-    git clone git@github.com:jcsda/crtm.git -b release/crtm_jedi
-    git clone git@github.com:jcsda/oops.git -b develop
-    git clone git@github.com:jcsda/saber.git -b develop
-    git clone git@github.com:jcsda/ioda.git -b develop
-    git clone git@github.com:jcsda/ufo.git -b develop
-    git clone git@github.com:jcsda/FMS.git -b release-stable-ecbuild
-    git clone git@github.com:jcsda/GFDL_atmos_cubed_sphere.git -b release-stable
-    git clone git@github.com:jcsda/femps.git -b develop
-    git clone git@github.com:jcsda/fv3-jedi-linearmodel.git -b develop
-    git clone git@github.com:jcsda/fv3-jedi.git -b develop
+    git checkout release/master-only
+    git clone https://github.com/jcsda/crtm.git -b v2.3-jedi --depth=1
+    git clone https://github.com/jcsda/fv3-jedi-linearmodel.git -b 1.0.0 --depth=1 fv3-jedi-lm
+    git clone https://github.com/jcsda/fv3-jedi.git -b 1.0.0 --depth=1
     mkdir -p /opt/jedi/build
     cd /opt/jedi/build
     ecbuild --build=Release ../fv3-bundle
