@@ -5,6 +5,9 @@ From: jcsda/docker-gnu-openmpi-dev:latest
 MAINTAINER Mark Miesch
 SPECIES JEDI
 
+%files
+    ssh-key/github_academy_rsa /root/github_academy_rsa
+
 %environment
     TERM=xterm
     export TERM
@@ -12,10 +15,41 @@ SPECIES JEDI
     export GIT_MERGE_AUTOEDIT
     export LANG=en_US.UTF-8
     export LANGUAGE=en_US:en
+    export PATH=/usr/local/bin:/usr/local/miniconda3/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/PanoplyJ
+    alias pip=/usr/local/miniconda3/bin/pip
 
 %post
     echo "Hello from inside the container"
-    mkdir -p /var/go
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda3
+    export PATH=/usr/local/miniconda3/bin:$PATH
+    conda install numpy
+    conda install matplotlib
+    conda install click
+    conda install pandas
+    conda install -c conda-forge ruamel.yaml
+    conda install -c conda-forge netcdf4
+    conda install -c conda-forge xarray
+    conda install -c conda-forge cartopy
+    cd /opt
+    wget https://www.giss.nasa.gov/tools/panoply/download/PanoplyJ-4.11.6.tgz
+    tar xvf PanoplyJ-4.11.6.tgz
+    rm PanoplyJ-4.11.6.tgz
+    apt-get update
+    apt-get install -y --no-install-recommends feh
+    apt-get install -y --no-install-recommends default-jre
+    mkdir -p /root/.ssh
+    mv /root/github_academy_rsa /root/.ssh/github_academy_rsa
+    eval "$(ssh-agent -s)"
+    ssh-add /root/.ssh/github_academy_rsa
+    ssh -T -o "StrictHostKeyChecking=no" git@github.com || mkdir -p /opt/jedi
+    cd /opt/jedi
+    git clone git@github.com:jcsda-internal/ioda-plots.git
+    cd ioda-plots
+    git checkout feature/cris
+    /usr/local/miniconda3/bin/pip install -e .
+    rm /root/.ssh/github_academy_rsa
+    rm -rf /var/lib/apt/lists/*
 
 %runscript
     bash -l
