@@ -168,6 +168,7 @@ Stage0 += shell(commands=['useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m
     'echo "export LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH" >> /etc/bash.bashrc',
     'echo "export PYTHONPATH=/usr/local/lib:$PYTHONPATH" >> /etc/bash.bashrc',
     'echo "ulimit -s unlimited" >> /etc/bash.bashrc',
+    'echo "ulimit -v unlimited" >> /etc/bash.bashrc',
     'echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc',
     'echo "[credential]\\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig',
     'chown -R jedi:jedi ~jedi/.gitconfig'])
