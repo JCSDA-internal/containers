@@ -7,4 +7,6 @@ intel_license/
 intel_tarballs/
 context*
 *.log
+*.sif
+*.tar.gz
 ssh-key/
