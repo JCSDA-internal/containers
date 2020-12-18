@@ -48,7 +48,7 @@ echo "=============================================================="
 echo "   Building Charliecloud Image" ${CNAME}_${TAG}
 echo "=============================================================="
 
-get_ans "Build Charliecloud image?"
+get_ans "Build Charliecloud image? (y/n)"
 
 if [[ $ans == y ]] ; then
     echo "Building Charliecloud image"
@@ -62,7 +62,7 @@ echo "=============================================================="
 echo "   Building Singularity Image" ${CNAME}_${TAG}
 echo "=============================================================="
 
-get_ans "Build Singularity image?"
+get_ans "Build Singularity image? (y/n)"
 
 if [[ $ans == y ]] ; then
 
