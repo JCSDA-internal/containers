@@ -41,7 +41,7 @@ echo "=============================================================="
 mkdir -p context
 cd context
 ln -sf ../Dockerfile.${CNAME} .
-$SUDO docker image build --no-cache --pull -t ch-${CNAME}:${TAG} -f Dockerfile.${CNAME} .
+#$SUDO docker image build --no-cache --pull -t ch-${CNAME}:${TAG} -f Dockerfile.${CNAME} .
 cd ..
 
 echo "=============================================================="
@@ -53,7 +53,7 @@ get_ans "Build Charliecloud image?"
 if [[ $ans == y ]] ; then
     echo "Building Charliecloud image"
     mkdir -p containers
-    $SUDO ch-builder2tar ch-${CNAME}_${TAG} containers
+    $SUDO ch-builder2tar ch-${CNAME}:${TAG} containers
 else
    echo "Not building Charliecloud image"
 fi

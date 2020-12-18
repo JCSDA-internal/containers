@@ -1,5 +1,5 @@
 # ch-test-scope: full
-FROM jcsda/docker-intel-oneapi-dev:latest
+FROM jcsda/docker-intel-oneapi-dev:beta
 LABEL maintainer "Mark Miesch <miesch@ucar.edu>"
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6B05F25D762E3157
