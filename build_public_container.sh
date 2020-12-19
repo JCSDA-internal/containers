@@ -41,7 +41,7 @@ echo "=============================================================="
 mkdir -p context
 cd context
 ln -sf ../Dockerfile.${CNAME} .
-#$SUDO docker image build --no-cache --pull -t ch-${CNAME}:${TAG} -f Dockerfile.${CNAME} .
+$SUDO docker image build --no-cache --pull -t ch-${CNAME}:${TAG} -f Dockerfile.${CNAME} .
 cd ..
 
 echo "=============================================================="
