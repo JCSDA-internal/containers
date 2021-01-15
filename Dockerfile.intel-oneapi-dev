@@ -33,7 +33,7 @@ ARG apt_repo=https://apt.repos.intel.com/oneapi
 RUN echo "deb $apt_repo all main" > /etc/apt/sources.list.d/oneAPI.list
 
 #-------------------------------------------------------------
-# From Intel's os-tools-ubuntu20 Dockerfile
+# From Intel's hpckit-ubuntu20 Dockerfile
 # Copyright (c) 2019-2020 Intel Corporation.
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -61,7 +61,6 @@ RUN echo "if [ -z \"$INTEL_SH_GUARD\" ]; then" > /etc/profile.d/intel.sh \
     && chmod a+x /etc/profile.d/intel.sh
 
 #-------------------------------------------------------------
-# From Intel's os-tools-ubuntu20 Dockerfile
 # Charliecloud does not modify the environment variables.  So, to set
 # environment variables we need to put them in an initialization script
 RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /etc/bash.bashrc && \
