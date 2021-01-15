@@ -70,7 +70,7 @@ if [[ $ans == y ]] ; then
    cd containers
 
    echo "Building Singularity image"
-   $SUDO singularity build jedi-$CNAME_${TAG}.sif ../Singularity.${CNAME}
+   $SUDO singularity build jedi-${CNAME}_${TAG}.sif ../Singularity.${CNAME}
 
    singularity sign jedi-$CNAME_${TAG}.sif
 
