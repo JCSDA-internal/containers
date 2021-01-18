@@ -88,9 +88,11 @@ if [[ $ans == y ]] ; then
       else
         echo "Not making backup image on sylabs cloud"
       fi
+      singularity push jedi-$CNAME.sif library://jcsda/public/jedi-$CNAME:latest
+    else
+      singularity push jedi-$CNAME_${TAG}.sif library://jcsda/public/jedi-$CNAME:${TAG}
     fi
 
-    singularity push jedi-$CNAME.sif library://jcsda/public/jedi-$CNAME:latest
   fi
 else
    echo "Not pushing Singularity container"
