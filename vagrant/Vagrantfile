@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
 
   # provision the VM with docker
   #config.vm.provision "docker"
-  
+
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.
@@ -74,7 +74,7 @@ Vagrant.configure("2") do |config|
   #   vb.gui = true
   #
      # Customize the name of your VM:
-     vb.name = "jedibox"    
+     vb.name = "jedibox"
 
      # Customize the amount of memory on the VM:
      vb.memory = "12288"
@@ -90,10 +90,10 @@ Vagrant.configure("2") do |config|
   # provision with a basic user environment
   config.vm.provision "environment", type: "shell", privileged: true,
                        inline: <<-EOF
-    set -e             
+    set -e
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y build-essential python gcc curl
+    apt-get install -y build-essential python gcc curl git
     apt-get install -y autoconf pkg-config libtool autoconf-archive
     apt-get update
   EOF
@@ -101,7 +101,7 @@ Vagrant.configure("2") do |config|
   # basic installation of Charliecloud - skip the tests
   config.vm.provision "charliecloud", type: "shell", privileged: false,
                        inline: <<-EOF
-    set -e             
+    set -e
     export DEBIAN_FRONTEND=noninteractive
     mkdir -p $HOME/build
     cd $HOME/build
@@ -122,33 +122,35 @@ Vagrant.configure("2") do |config|
     export DEBIAN_FRONTEND=noninteractive
 
     # package dependencies
-    sudo apt-get install -y libssl-dev uuid-dev libgpgme11-dev squashfs-tools
+    sudo apt-get install -y libssl-dev uuid-dev libgpgme11-dev squashfs-tools libseccomp-dev wget cryptsetup
 
     # install Go
     cd $HOME
-    export VERSION=1.13.4 OS=linux ARCH=amd64
-    wget -nv --no-check-certificate https://golang.org/dl/go$VERSION.$OS-$ARCH.tar.gz
+    export VERSION=1.14.12 OS=linux ARCH=amd64
+    wget -nv --no-check-certificate https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz
     sudo tar -C /usr/local -xzf go$VERSION.$OS-$ARCH.tar.gz
     rm -f go$VERSION.$OS-$ARCH.tar.gz
-    echo 'export GOPATH=${HOME}/go' >> ~/.bashrc
+    echo 'export GOPATH=${HOME}/go' >> ${HOME}/.bashrc
     echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> $HOME/.bashrc
 
     # this doesn't appear to be working so add paths manually
-    #source $HOME/.bashrc 
-    export GOPATH=$HOME/go
+    #source $HOME/.bashrc
+    export GOPATH=${HOME}/go
     export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin
 
+    # install golangci-lint (optional)
+    curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.21.0
+
     # build and install Singularity
-    sudo mkdir -p /opt/singularity
-    cd /opt/singularity
-    export VERSION=3.5.0
-    sudo wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz 
-    sudo tar -xzf singularity-${VERSION}.tar.gz
+    mkdir -p ${GOPATH}/src/github.com/sylabs
+    cd ${GOPATH}/src/github.com/sylabs
+    git clone https://github.com/sylabs/singularity.git
     cd singularity
-    sudo ./mconfig
-    sudo make -C builddir
-    sudo make -C builddir install
-    sudo rm /opt/singularity/singularity-${VERSION}.tar.gz
+    git checkout v3.7.1
+    ./mconfig -p /usr/local
+    cd ./builddir
+    make
+    sudo make install
 
   EOF
 
