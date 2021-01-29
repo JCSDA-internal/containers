@@ -19,12 +19,6 @@ function get_ans {
 # It's a simplified version of the file of the same name in the root directory of
 # the repository that does not require ssh credentials.
 
-if [ $# -lt 1 ]; then
-   echo "Usage: "
-   echo "./build_public_container.sh <container-name> <tag>"
-   exit 1
-fi
-
 # Stop if anything goes wrong
 set -e
 

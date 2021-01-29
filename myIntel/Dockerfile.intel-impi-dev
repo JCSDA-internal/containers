@@ -1,4 +1,4 @@
-FROM jcsda/docker_base-intel-impi:latest
+FROM jcsda/docker_base-intel-impi-dev:latest
 LABEL maintainer "Mark Miesch <miesch@ucar.edu>"
 
 #-------------------------------------------------------------
