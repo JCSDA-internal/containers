@@ -3,7 +3,6 @@
 # This software is licensed under the terms of the Apache Licence Version 2.0 which can be obtained at
 # http://www.apache.org/licenses/LICENSE-2.0.
 
-
 #------------------------------------------------------------------------
 function get_ans {
     ans=''
@@ -14,9 +13,12 @@ function get_ans {
     done
 }
 
-#------------------------------------------------------------------------
+#---------------------------------------------------------------------------
 # This script pushes Singularity and Charliecloud containers to Sylabs cloud
 # or AWS S3, optionally making a backup.
+#
+# For intel containers, it will also push the Docker image to a private area
+# on AWS S3
 
 if [ $# -lt 1 ]; then
    echo "Usage: "
@@ -33,6 +35,26 @@ export USE_SUDO=${USE_SUDO:-"y"}
 
 export CNAME=${1:-"gnu-openmpi-dev"}
 export TAG=${2:-"latest"}
+
+if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
+
+  echo "=============================================================="
+  echo "   Pushing Docker Container" ${CNAME}-${TAG}
+  echo "=============================================================="
+
+  get_ans 'Push Docker container to S3 and replace latest? (y/n)'
+
+  if [[ $ans == y ]] ; then
+
+    mkdir -p containers
+    sudo docker save jedi-${CNAME}:${TAG} | gzip > containers/docker-${CNAME}.tar.gz
+
+    echo "Sending to Amazon S3"
+    aws s3 mv s3://privatecontainers/docker-jedi-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-revert.tar.gz
+    aws s3 cp containers/docker-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}.tar.gz
+  fi
+fi
+
 
 echo "=============================================================="
 echo "   Pushing Charliecloud Container" ${CNAME}-${TAG}
