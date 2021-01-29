@@ -3,9 +3,11 @@
 containers/
 vagrant/vagrant_data/
 vagrant/.vagrant
-intel_license/
-intel_tarballs/
+intel19/context19/intel_license/
+intel19/context19/intel_tarballs/
+intel19/context19/ssh-key/
 context*
+intel19/containers/
 *.log
 *.sif
 *.tar.gz
