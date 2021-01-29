@@ -34,15 +34,15 @@ export USE_SUDO=${USE_SUDO:-"y"}
 export CNAME=${1:-"gnu-openmpi-dev"}
 export TAG=${2:-"latest"}
 
-echo "=============================================================="
-echo "   Building Docker Image" ${CNAME}
-echo "=============================================================="
+if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
 
-mkdir -p context
-cd context
-ln -sf ../Dockerfile.${CNAME} .
-$SUDO docker image build --no-cache --pull -t ch-${CNAME}:${TAG} -f Dockerfile.${CNAME} .
-cd ..
+  echo "=============================================================="
+  echo "   Building Docker Image" ${CNAME}
+  echo "=============================================================="
+
+  mkdir -p context
+  $SUDO docker image build --no-cache --pull -t ${CNAME}:${TAG} -f Dockerfile.${CNAME} context
+fi
 
 echo "=============================================================="
 echo "   Building Charliecloud Image" ${CNAME}_${TAG}
@@ -51,9 +51,19 @@ echo "=============================================================="
 get_ans "Build Charliecloud image? (y/n)"
 
 if [[ $ans == y ]] ; then
-    echo "Building Charliecloud image"
-    mkdir -p containers
-    $SUDO ch-builder2tar ch-${CNAME}:${TAG} containers
+
+   if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
+     DNAME=${CNAME}
+   else
+     echo "Building Docker image"
+     DNAME=ch-${CNAME}
+     mkdir -p context
+     $SUDO docker image build --no-cache --pull -t ${DNAME}:${TAG} -f Dockerfile.${CNAME} context
+   fi
+
+   echo "Building Charliecloud image"
+   mkdir -p containers
+   $SUDO ch-builder2tar ${DNAME}:${TAG} containers
 else
    echo "Not building Charliecloud image"
 fi
