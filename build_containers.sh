@@ -20,7 +20,7 @@ function get_ans {
 
 if [ $# -lt 1 ]; then
    echo "Usage: "
-   echo "./build_public_container.sh <container-name> <tag>"
+   echo "./build_containers.sh <container-name> <tag>"
    exit 1
 fi
 
@@ -32,7 +32,8 @@ export USE_SUDO=${USE_SUDO:-"y"}
 [[ $USE_SUDO =~ [yYtT] ]] && export SUDO="sudo" || unset SUDO
 
 export CNAME=${1:-"gnu-openmpi-dev"}
-export TAG=${2:-"latest"}
+export TAG=${2:-"beta"}
+KEY=$HOME/.ssh/github_academy_rsa
 
 if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
 
@@ -41,7 +42,9 @@ if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
   echo "=============================================================="
 
   mkdir -p context
-  $SUDO docker image build --no-cache --pull -t ${CNAME}:${TAG} -f Dockerfile.${CNAME} context
+  export DOCKER_BUILDKIT=1
+  docker build --no-cache --ssh github_ssh_key=${KEY} --progress=plain -f Dockerfile.${CNAME} -t jcsda/docker-${CNAME}:${TAG} context 2>&1 | tee build.log
+
 fi
 
 echo "=============================================================="
@@ -87,7 +90,7 @@ if [[ $ans == y ]] ; then
    fi
 
    if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
-      $SUDO singularity build jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}
+      $SUDO singularity build jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:${TAG}
    else
       $SUDO singularity build jedi-${SNAME}.sif ../Singularity.${CNAME}
    fi

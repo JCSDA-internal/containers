@@ -11,9 +11,13 @@ These instructions are only for those who wish to use the Intel compiler suite. 
 Prerequisites
 -------------
 
-Now, you need to decide what container provider you wish to use and install the appropriate software.  At a minimum, you need to install Docker
+Now, you need to decide what container provider you wish to use and install the appropriate software.  At a minimum, you need to install Docker because the Singularity and Charliecloud containers are each built from the Docker container.  See the [Docker documentation](https://docs.docker.com/get-docker/) for installation instructions.
 
+To build a Singularity or a Charliecloud container you need one or the the other installed.  You do not need to install both.
 
+Also, the script assumes that you have root privileges on the system you run it on.
+
+Note that these prerequisites are necessary to build a container.  You can run a Singularity or Charliecloud container without root privileges and without docker.
 
 How to Build a JEDI Intel Development Container
 -----------------------------------------------
@@ -30,3 +34,9 @@ Then enter the following command and respond to the questions - by default it wi
 ```
 ./build_containers.sh intel-impi-dev
 ```
+
+See the JEDI Documentation for tips on using your new [Singularity](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/using/jedi_environment/singularity.html) or [Charliecloud](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/using/jedi_environment/charliecloud.html) container.
+
+Also note that this is a [development container](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/using/jedi_environment/containers.html), which means that it includes the compilers and JEDI dependencies (the jedi-stack), but it does not include the JEDI code itself.  So, to continue your JEDI adventure, you would proceed to enter the container and then [download and build the JEDI code](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/using/building_and_running/building_jedi.html).
+
+Consult the JEDI team or check out our [JEDI forums](https://forums.jcsda.org/) if you have any questions or problems.
