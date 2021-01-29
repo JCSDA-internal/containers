@@ -43,7 +43,7 @@ if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
 
   mkdir -p context
   export DOCKER_BUILDKIT=1
-  docker build --no-cache --ssh github_ssh_key=${KEY} --progress=plain -f Dockerfile.${CNAME} -t jcsda/docker-${CNAME}:${TAG} context 2>&1 | tee build.log
+  docker build --no-cache --ssh github_ssh_key=${KEY} --progress=plain -f Dockerfile.${CNAME} -t jedi-${CNAME}:${TAG} context 2>&1 | tee build.log
 
 fi
 
@@ -56,7 +56,7 @@ get_ans "Build Charliecloud image? (y/n)"
 if [[ $ans == y ]] ; then
 
    if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
-     DNAME=${CNAME}
+     DNAME=jedi-${CNAME}
    else
      echo "Building Docker image"
      DNAME=ch-${CNAME}
@@ -67,6 +67,11 @@ if [[ $ans == y ]] ; then
    echo "Building Charliecloud image"
    mkdir -p containers
    $SUDO ch-builder2tar ${DNAME}:${TAG} containers
+
+   # rename file if intel
+   [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]] && \
+     mv containers/jedi-${CNAME}\:${TAG}.tar.gz containers/ch-${CNAME}\:${TAG}.tar.gz
+
 else
    echo "Not building Charliecloud image"
 fi
