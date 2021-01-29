@@ -8,7 +8,7 @@ The instructions below are intended for the JEDI core team, who are responsible 
 
 However, since the JEDI core team cannot legally distribute intel containers for licensing reasons, JEDI users and developers are encouraged to build their own intel development container.
 
-[See here for instructions on how to build your own JEDI Intel development container: Docker, Singularity, or Charliecloud](doc/Intel.md)
+[See here for instructions on how to build your own JEDI Intel development container: Docker, Singularity, or Charliecloud](myIntel/Intel.md)
 
 Organization of Repository
 --------------------------
@@ -16,7 +16,7 @@ Organization of Repository
 - top-level directory: tools for building Singularity, Docker, and Charliecloud containers
 - `vagrant`: tools for building Vagrant virtual machines that are provisioned to run JEDI containers
 - `modulefiles`, `runscripts`: These directories contain sample modulefiles and batch scripts for running JEDI "Supercontainers" across nodes on HPC systems
-- `intel19` contains 
+- `intel19` contains
 
 Building Public containers
 ------------------------------------------------

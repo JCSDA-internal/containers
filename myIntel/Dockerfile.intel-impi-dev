@@ -1,0 +1,139 @@
+FROM jcsda/docker_base-intel-impi:latest
+LABEL maintainer "Mark Miesch <miesch@ucar.edu>"
+
+#-------------------------------------------------------------
+# From Intel's os-tools-ubuntu20 Dockerfile
+# Copyright (c) 2019-2020 Intel Corporation.
+# SPDX-License-Identifier: BSD-3-Clause
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
+
+# install OS tools
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 \
+    # make
+    build-essential \
+    # library helper
+    pkg-config \
+    cmake \
+    ca-certificates \
+    gnupg
+
+# add apt repo public key
+ARG url=https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+ADD $url /
+RUN file=$(basename "$url") && \
+    apt-key add "$file" && \
+    rm "$file"
+
+# configure the repository
+ARG apt_repo=https://apt.repos.intel.com/oneapi
+RUN echo "deb $apt_repo all main" > /etc/apt/sources.list.d/oneAPI.list
+
+#-------------------------------------------------------------
+# From Intel's hpckit-ubuntu20 Dockerfile
+# Copyright (c) 2019-2020 Intel Corporation.
+# SPDX-License-Identifier: BSD-3-Clause
+
+# requires oneapi-basekit image, assumes oneapi apt repo is configured
+# install Intel(R) oneAPI HPC Toolkit
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 \
+    intel-hpckit-getting-started \
+    intel-oneapi-clck \
+    intel-oneapi-common-licensing \
+    intel-oneapi-common-vars \
+    intel-oneapi-dev-utilities \
+    intel-oneapi-dpcpp-cpp-compiler-pro \
+    intel-oneapi-ifort \
+    intel-oneapi-inspector \
+    intel-oneapi-itac \
+    intel-oneapi-mpi-devel \
+    intel-oneapi-mkl-devel \
+    --
+
+RUN echo "if [ -z \"$INTEL_SH_GUARD\" ]; then" > /etc/profile.d/intel.sh \
+    && echo "    source /opt/intel/oneapi/setvars.sh -i_mpi_library_kind=release_mt" >> /etc/profile.d/intel.sh \
+    && echo "fi" >> /etc/profile.d/intel.sh \
+    && echo "export INTEL_SH_GUARD=1" >> /etc/profile.d/intel.sh \
+    && chmod a+x /etc/profile.d/intel.sh
+
+#-------------------------------------------------------------
+# Build jedi-stack
+#
+
+SHELL ["/bin/bash", "-c"]
+
+RUN rm -f /usr/bin/gmake && \
+    ln -s /usr/bin/make /usr/bin/gmake
+
+ENV I_MPI_THREAD_SPLIT=1 \
+    I_MPI_LIBRARY_KIND='release_mt' \
+    CMAKE_C_COMPILER=mpiicc \
+    CMAKE_CXX_COMPILER=mpiicpc \
+    CMAKE_Fortran_COMPILER=mpiifort \
+    CMAKE_Platform=linux.intel \
+    CMAKE_PREFIX_PATH=/usr/local \
+    NETCDF=/usr/local \
+    CC=mpiicc \
+    CXX=mpiicpc \
+    FC=mpiifort \
+    MPI_CC=mpiicc \
+    MPI_CXX=mpiicpc \
+    MPI_FC=mpiifort \
+    SERIAL_CC=icc \
+    SERIAL_CXX=icpc \
+    SERIAL_FC=ifort \
+    PNETCDF=/usr/local \
+    HDF5_ROOT=/usr/local \
+    PIO=/usr/local \
+    BOOST_ROOT=/usr/local \
+    EIGEN3_INCLUDE_DIR=/usr/local \
+    PATH=/usr/local/bin:$PATH \
+    LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH \
+    CPATH=/usr/local/include:$CPATH \
+    PYTHONPATH=/usr/local/lib:$PYTHONPATH
+
+# build the jedi stack
+RUN cd /root \
+    && source /etc/profile \
+    && git clone https://github.com/jcsda/jedi-stack.git \
+    && cd jedi-stack/buildscripts \
+    && git checkout develop \
+    && ./build_stack.sh "container-intel-oneapi-dev" \
+    && mv ../jedi-stack-contents.log /etc \
+    && chmod a+r /etc/jedi-stack-contents.log \
+    && rm -rf /root/jedi-stack \
+    && mkdir /worktmp
+
+#Make a non-root user:jedi / group:jedi for running MPI
+RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
+    echo "export FC=mpiifort" >> ~jedi/.bashrc && \
+    echo "export CC=mpiicc" >> ~jedi/.bashrc && \
+    echo "export CXX=mpiicpc" >> ~jedi/.bashrc && \
+    echo "export PYTHONPATH=/usr/local/lib:$PYTHONPATH" >> ~jedi/.bashrc && \
+    echo "ulimit -s unlimited" >> ~jedi/.bashrc && \
+    echo "ulimit -v unlimited" >> ~jedi/.bashrc && \
+    echo -e "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
+    mkdir ~jedi/.openmpi && \
+    echo "rmaps_base_oversubscribe = 1" >> ~jedi/.openmpi/mca-params.conf && \
+    chown -R jedi:jedi ~jedi/.gitconfig ~jedi/.openmpi
+
+#-------------------------------------------------------------
+# Charliecloud does not modify the environment variables.  So, to set
+# environment variables we need to put them in an initialization script
+RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /etc/bash.bashrc && \
+    echo 'export PATH=/usr/local/mpich/bin:$PATH' >> /etc/bash.bashrc && \
+    echo 'export NETCDF=/usr/local' >> /etc/bash.bashrc && \
+    echo 'export PNETCDF=/usr/local' >> /etc/bash.bashrc && \
+    echo 'export PIO=/usr/local' >> /etc/bash.bashrc && \
+    echo 'export BOOST_ROOT=/usr/local' >> /etc/bash.bashrc && \
+    echo 'export EIGEN3_INCLUDE_DIR=/usr/local' >> /etc/bash.bashrc && \
+    echo 'export PYTHONPATH=/usr/local/lib:$PYTHONPATH' >> /etc/bash.bashrc && \
+    echo 'export FC=mpiifort' >> /etc/bash.bashrc && \
+    echo 'export CC=mpiicc' >> /etc/bash.bashrc && \
+    echo 'export CXX=mpiicpc' >> /etc/bash.bashrc
+
+CMD ["/bin/bash" , "-l"]

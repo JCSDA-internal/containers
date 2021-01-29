@@ -8,6 +8,13 @@ So JCSDA cannot provide a JEDI development container with Intel compilers.  Howe
 
 These instructions are only for those who wish to use the Intel compiler suite.  If you are happy with other compiler suites such as GNU and Clang, then there is no need for you to build your own container.  You can obtain the latest public JEDI containers [as described in the JEDI Documentation](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/using/jedi_environment/containers.html#available-containers).  Or, you can obtain development and application containers distributed with tagged JEDI releases at the [JCSDA software container repository](http://data.jcsda.org/pages/containers.html).
 
+Prerequisites
+-------------
+
+Now, you need to decide what container provider you wish to use and install the appropriate software.  At a minimum, you need to install Docker
+
+
+
 How to Build a JEDI Intel Development Container
 -----------------------------------------------
 
@@ -15,4 +22,11 @@ The first step in building your own JEDI Intel Development Container is to clone
 
 ```
 git clone https://github.com/jcsda-internal/containers.git
+cd containers
+```
+
+Then enter the following command and respond to the questions - by default it will only build a Docker container but you can also build a Singularity container and/or a Charliecloud container if you wish:
+
+```
+./build_containers.sh intel-impi-dev
 ```

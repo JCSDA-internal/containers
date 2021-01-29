@@ -15,8 +15,9 @@ function get_ans {
 }
 
 #------------------------------------------------------------------------
-# This script creates new Singularity and Charliecloud containers from the
-# existing Docker containers we use for CI.
+# This script creates new Intel, Docker, Singularity and Charliecloud containers
+# It's a simplified version of the file of the same name in the root directory of
+# the repository that does not require ssh credentials.
 
 if [ $# -lt 1 ]; then
    echo "Usage: "
@@ -31,18 +32,15 @@ set -e
 export USE_SUDO=${USE_SUDO:-"y"}
 [[ $USE_SUDO =~ [yYtT] ]] && export SUDO="sudo" || unset SUDO
 
-export CNAME=${1:-"gnu-openmpi-dev"}
-export TAG=${2:-"latest"}
+export CNAME="intel-impi-dev"
+export TAG="latest"
 
-if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
+echo "=============================================================="
+echo "   Building Docker Image" ${CNAME}
+echo "=============================================================="
 
-  echo "=============================================================="
-  echo "   Building Docker Image" ${CNAME}
-  echo "=============================================================="
-
-  mkdir -p context
-  $SUDO docker image build --no-cache --pull -t ${CNAME}:${TAG} -f Dockerfile.${CNAME} context
-fi
+mkdir -p context
+$SUDO docker image build --no-cache --pull -t ${CNAME}:${TAG} -f Dockerfile.${CNAME} context
 
 echo "=============================================================="
 echo "   Building Charliecloud Image" ${CNAME}_${TAG}
@@ -51,19 +49,9 @@ echo "=============================================================="
 get_ans "Build Charliecloud image? (y/n)"
 
 if [[ $ans == y ]] ; then
-
-   if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
-     DNAME=${CNAME}
-   else
-     echo "Building Docker image"
-     DNAME=ch-${CNAME}
-     mkdir -p context
-     $SUDO docker image build --no-cache --pull -t ${DNAME}:${TAG} -f Dockerfile.${CNAME} context
-   fi
-
    echo "Building Charliecloud image"
    mkdir -p containers
-   $SUDO ch-builder2tar ${DNAME}:${TAG} containers
+   $SUDO ch-builder2tar ${CNAME}:${TAG} containers
 else
    echo "Not building Charliecloud image"
 fi
@@ -75,25 +63,8 @@ echo "=============================================================="
 get_ans "Build Singularity image? (y/n)"
 
 if [[ $ans == y ]] ; then
-
-   mkdir -p containers
-   cd containers
-
    echo "Building Singularity image"
-   if [[ ${TAG} == "latest" ]]; then
-      SNAME=${CNAME}
-   else
-      SNAME=${CNAME}_${TAG}
-   fi
-
-   if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
-      $SUDO singularity build jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}
-   else
-      $SUDO singularity build jedi-${SNAME}.sif ../Singularity.${CNAME}
-   fi
-
-   singularity sign jedi-${SNAME}.sif
-
+   $SUDO singularity build jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}
 fi
 
 exit 0
