@@ -59,7 +59,7 @@ if [[ $ans == y ]] ; then
      DNAME=jedi-${CNAME}
    else
      echo "Building Docker image"
-     DNAME=ch-${CNAME}
+     DNAME=ch-jedi-${CNAME}
      mkdir -p context
      $SUDO docker image build --no-cache --pull -t ${DNAME}:${TAG} -f Dockerfile.${CNAME} context
    fi
@@ -95,12 +95,12 @@ if [[ $ans == y ]] ; then
    fi
 
    if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
-      $SUDO singularity build jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:${TAG}
+      $SUDO singularity build jedi-${SNAME}.sif docker-daemon:jedi-${CNAME}:${TAG}
    else
       $SUDO singularity build jedi-${SNAME}.sif ../Singularity.${CNAME}
    fi
 
-   singularity sign jedi-${CNAME}.sif
+   singularity sign jedi-${SNAME}.sif
 
 fi
 
