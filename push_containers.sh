@@ -26,9 +26,6 @@ if [ $# -lt 1 ]; then
    exit 1
 fi
 
-# Stop if anything goes wrong
-set -e
-
 # may need to use sudo unless you're running as root
 export USE_SUDO=${USE_SUDO:-"y"}
 [[ $USE_SUDO =~ [yYtT] ]] && export SUDO="sudo" || unset SUDO

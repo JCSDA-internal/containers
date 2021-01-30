@@ -100,7 +100,7 @@ if [[ $ans == y ]] ; then
       $SUDO singularity build jedi-${SNAME}.sif ../Singularity.${CNAME}
    fi
 
-   singularity sign jedi-${SNAME}.sif
+   singularity sign jedi-${CNAME}.sif
 
 fi
 
