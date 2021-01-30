@@ -61,8 +61,6 @@ if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
       aws s3 cp containers/docker-${CNAME}-${TAG}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-${TAG}.tar.gz
     fi
 
-    aws s3 mv s3://privatecontainers/docker-jedi-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}-revert.tar.gz
-    aws s3 cp containers/docker-${CNAME}.tar.gz s3://privatecontainers/docker-jedi-${CNAME}.tar.gz
   fi
 fi
 
@@ -74,6 +72,19 @@ echo "=============================================================="
 get_ans 'Push Charliecloud container? (y/n)'
 
 if [[ $ans == y ]] ; then
+  if [[ $(echo $CNAME| cut -d- -f1) == "intel" ]]; then
+    echo "Pushing Charliecloud container to Amazon S3 (private)"
+
+    if [[ ${TAG} == "beta" ]]; then
+      aws s3api head-object --bucket privatecontainers --key jedi-${CNAME}.sif && file_exists=true
+      if [ ${file_exists} ]; then
+        echo "Saving previous container as revert"
+	    aws s3 mv s3://privatecontainers/jedi-${CNAME}.sif s3://privatecontainers/jedi-${CNAME}-revert.sif
+      fi
+    fi
+    echo "Pushing to AWS S3"
+    aws s3 cp containers/jedi-${CNAME}_${TAG}.sif s3://privatecontainers/jedi-${CNAME}.tar.gz
+  else
     echo "Pushing Charliecloud container to Amazon S3"
     if [[ ${TAG} == "beta" ]]; then
         aws s3api head-object --bucket data.jcsda.org --key containers/ch-jedi-${CNAME}.tar.gz && file_exists=true || file_exists=false
@@ -98,14 +109,14 @@ if [[ $ans == y ]] ; then
   if [[ $(echo $CNAME| cut -d- -f1) == "intel" ]]; then
 
     if [[ ${TAG} == "beta" ]]; then
-      aws s3api head-object --bucket data.jcsda.org --key containers/jedi-${CNAME}.sif && file_exists=true
+      aws s3api head-object --bucket privatecontainers --key jedi-${CNAME}.sif && file_exists=true
       if [ ${file_exists} ]; then
         echo "Saving previous container as revert"
-	    aws s3 mv s3://data.jcsda.org/containers/jedi-${CNAME}.sif s3://data.jcsda.org/containers/jedi-${CNAME}-revert.sif
+	    aws s3 mv s3://privatecontainers/jedi-${CNAME}.sif s3://privatecontainers/jedi-${CNAME}-revert.sif
       fi
     fi
-    echo "Pushing to AWS S3"
-    aws s3 cp containers/jedi-${CNAME}_${TAG}.sif s3://data.jcsda.org/containers/jedi-${CNAME}.tar.gz
+    echo "Pushing to AWS S3 (private)"
+    aws s3 cp containers/jedi-${CNAME}_${TAG}.sif s3://privatecontainers/jedi-${CNAME}.tar.gz
 
   else # push gnu and clang containers to sylabs cloud
 
