@@ -51,7 +51,11 @@ echo "=============================================================="
 echo "   Building Charliecloud Image" ${CNAME}_${TAG}
 echo "=============================================================="
 
-get_ans "Build Charliecloud image? (y/n)"
+if [[ $(echo ${CNAME} | cut -d- -f1) =~ "tutorial" ]]; then
+   ans=n # Charliecloud and docker not available for tutorial container
+else
+   get_ans "Build Charliecloud image? (y/n)"
+fi
 
 if [[ $ans == y ]] ; then
 

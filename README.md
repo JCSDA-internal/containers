@@ -29,8 +29,8 @@ The scripts in this directory also assume that you have root privileges.
 
 Also, core developers often find it necessary to access feature or bugfix branches of the jedi stack for testing purposes.  So, the `build_container.sh` script uses the JCSDA-internal (private) jedi-stack repo.  For this reason, you need to provide an ssh key for access.  This script uses a generic academy ssh key to ensure that it has read-only access to selected JCSDA repositories.  If you do not have access to this key, you can replace it with another by changing the `KEY` variable in `build_containers.sh`.  But it is recommended to retain the read-only access.  You can build the `myIntel` container without an ssh key.
 
-Build a container
------------------
+Build a dev container
+---------------------
 
 To build a Singularity, Charliecloud, and/or a Docker container, enter this and respond to the prompts to build the containers of your choice.
 
@@ -45,6 +45,8 @@ For the the gnu and clang containers, the Singularity containers are built direc
 For the `intel-impi-dev` container, a Docker file is always created and then the Singularity and Charliecloud containers are created from that.
 
 The intel Docker container is the one used for CI so it is kept relatively compact.  If you wish to add additional components such as Vtune, it is recommended you use the companion scripts in the `myIntel` directory.  These scripts are simplified in the root directory but they are intended for use by the general JEDI user and developer community.  The main simplification is that there is no need to supply an ssh key because those scripts only access the public jedi-stack repo.
+
+To build the tutorial container, just specify `tutorial` for the `<name>`.  The tutorial container is exclusively a Singularity container and uses GNU-OpenMPI: There are no clang or intel options and there are no Docker or Charliecloud containers created.
 
 The Singularity and Charliecloud container files will be placed in a subdirectory called `containers`.
 
@@ -92,5 +94,10 @@ Tagged Releases
 
 Most developers use the latest development containers but it's also useful to have tagged containers that accompany JEDI releases.  This is particularly relevant for scientific users (as opposed to developers) who may wish to use tagged releases and containers for reproducibility in research.  Tagged containers can also be used to provide stability for operational or Near-Real-Time (NRT) workflows.
 
-Sylabs cloud has a storage quota (currently 11 GB) that would be quickly overwhelmed if we were to store many release containers there.  So, this is reserved for "latest" and "revert".  Tagged singularity containers are distributed
+Sylabs cloud has a storage quota (currently 11 GB) that would be quickly overwhelmed if we were to store many release containers there.  So, this is reserved for "latest" and "revert".
 
+Tagged singularity containers are distributed on the [JCSDA Public Container Repository](http://data.jcsda.org/pages/containers.html) along with the latest and tagged Charliecloud containers.  Tagged docker release containers can be obtained from Docker Hub.  For example:
+
+```bash
+docker pull jcsda/docker-gnu-openmpi-dev:v1.0.0
+```

@@ -40,3 +40,5 @@ See the JEDI Documentation for tips on using your new [Singularity](https://join
 Also note that this is a [development container](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/using/jedi_environment/containers.html), which means that it includes the compilers and JEDI dependencies (the jedi-stack), but it does not include the JEDI code itself.  So, to continue your JEDI adventure, you would proceed to enter the container and then [download and build the JEDI code](https://jointcenterforsatellitedataassimilation-jedi-docs.readthedocs-hosted.com/en/latest/using/building_and_running/building_jedi.html).
 
 Consult the JEDI team or check out our [JEDI forums](https://forums.jcsda.org/) if you have any questions or problems.
+
+For further information and resources on building Intel containers, see [Intel's oneapi-containers repository on GitHub](https://github.com/intel/oneapi-containers).

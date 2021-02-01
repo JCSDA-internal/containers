@@ -20,6 +20,16 @@ RUN apt-get update -y && \
     ca-certificates \
     gnupg
 
+# Extras for VTune
+RUN apt-get update -y && \
+   apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 \
+   kmod \
+   linux-headers-5.4.0-1037-aws \
+   libgtk-3-0 \
+   libasound2 \
+   libxss1 \
+   libnss3
+
 # add apt repo public key
 ARG url=https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
 ADD $url /
@@ -48,6 +58,7 @@ RUN apt-get update -y && \
     intel-oneapi-dpcpp-cpp-compiler-pro \
     intel-oneapi-ifort \
     intel-oneapi-inspector \
+    intel-oneapi-vtune \
     intel-oneapi-itac \
     intel-oneapi-mpi-devel \
     intel-oneapi-mkl-devel \
