@@ -89,7 +89,6 @@ get_ans "Build Singularity image? (y/n)"
 if [[ $ans == y ]] ; then
 
    mkdir -p containers
-   cd containers
 
    echo "Building Singularity image"
    if [[ ${TAG} == "latest" ]]; then
@@ -99,12 +98,12 @@ if [[ $ans == y ]] ; then
    fi
 
    if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
-      $SUDO singularity build jedi-${SNAME}.sif docker-daemon:jedi-${CNAME}:${TAG}
+      $SUDO singularity build containers/jedi-${SNAME}.sif docker-daemon:jedi-${CNAME}:${TAG}
    else
-      $SUDO singularity build jedi-${SNAME}.sif ../Singularity.${CNAME}
+      $SUDO singularity build containers/jedi-${SNAME}.sif Singularity.${CNAME}
    fi
 
-   singularity sign jedi-${SNAME}.sif
+   singularity sign containers/jedi-${SNAME}.sif
 
 fi
 

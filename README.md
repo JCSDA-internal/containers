@@ -29,6 +29,8 @@ The scripts in this directory also assume that you have root privileges.
 
 Also, core developers often find it necessary to access feature or bugfix branches of the jedi stack for testing purposes.  So, the `build_container.sh` script uses the JCSDA-internal (private) jedi-stack repo.  For this reason, you need to provide an ssh key for access.  This script uses a generic academy ssh key to ensure that it has read-only access to selected JCSDA repositories.  If you do not have access to this key, you can replace it with another by changing the `KEY` variable in `build_containers.sh`.  But it is recommended to retain the read-only access.  You can build the `myIntel` container without an ssh key.
 
+Note: to build the tutorial container you have to copy the ssh key into the directory `ssh-key` and modify the singularity recipe file accordingly if it has a different name.
+
 Build a dev container
 ---------------------
 
