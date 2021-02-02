@@ -110,7 +110,7 @@ RUN --mount=type=ssh,id=github_ssh_key cd /root \
     && git clone git@github.com:jcsda-internal/jedi-stack.git \
     && cd jedi-stack/buildscripts \
     && git checkout develop \
-    && ./build_stack.sh "container-intel-oneapi-dev" \
+    && ./build_stack.sh "container-intel-impi-dev" \
     && mv ../jedi-stack-contents.log /etc \
     && chmod a+r /etc/jedi-stack-contents.log \
     && rm -rf /root/jedi-stack \
