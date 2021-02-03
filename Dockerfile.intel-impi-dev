@@ -116,6 +116,10 @@ RUN --mount=type=ssh,id=github_ssh_key cd /root \
     && rm -rf /root/jedi-stack \
     && mkdir /worktmp
 
+# clean up
+RUN git config --global --unset url.ssh://git@github.com/.insteadOf \
+    && rm -rf /root/.ssh
+
 #Make a non-root user:jedi / group:jedi for running MPI
 RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
     echo "export FC=mpiifort" >> ~jedi/.bashrc && \
