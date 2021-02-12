@@ -57,22 +57,127 @@ RUN apt-get update -y && \
         xserver-xorg && \
     rm -rf /var/lib/apt/lists/*
 
+# Mellanox OFED version 4.5-1.0.1.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gnupg \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - && \
+    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/4.5-1.0.1.0/ubuntu18.04/mellanox_mlnx_ofed.list && \
+    apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ibverbs-utils \
+        libibmad \
+        libibmad-devel \
+        libibumad \
+        libibumad-devel \
+        libibverbs-dev \
+        libibverbs1 \
+        libmlx4-1 \
+        libmlx4-dev \
+        libmlx5-1 \
+        libmlx5-dev \
+        librdmacm-dev \
+        librdmacm1 && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libpmi0 \
+        libpmi0-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# SLURM PMI2 version 20.02.5
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bzip2 \
+        file \
+        make \
+        perl \
+        tar \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://download.schedmd.com/slurm/slurm-20.02.5.tar.bz2 && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/slurm-20.02.5.tar.bz2 -C /var/tmp -j && \
+    cd /var/tmp/slurm-20.02.5 &&   ./configure --prefix=/usr/local/slurm-pmi2 && \
+    cd /var/tmp/slurm-20.02.5 && \
+    make -C contribs/pmi2 install && \
+    rm -rf /var/tmp/slurm-20.02.5 /var/tmp/slurm-20.02.5.tar.bz2
+
+# KNEM version 1.1.4
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        git && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && cd /var/tmp && git clone --depth=1 --branch knem-1.1.4 https://gitlab.inria.fr/knem/knem.git knem && cd - && \
+    mkdir -p /usr/local/knem && \
+    cd /var/tmp/knem && \
+    mkdir -p /usr/local/knem/include && \
+    cp common/*.h /usr/local/knem/include && \
+    rm -rf /var/tmp/knem
+ENV CPATH=/usr/local/knem/include:$CPATH
+
+# XPMEM branch master
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        autoconf \
+        automake \
+        ca-certificates \
+        file \
+        git \
+        libtool \
+        make && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && cd /var/tmp && git clone --depth=1 --branch master https://gitlab.com/hjelmn/xpmem.git xpmem && cd - && \
+    cd /var/tmp/xpmem && \
+    autoreconf --install && \
+    cd /var/tmp/xpmem &&   ./configure --prefix=/usr/local/xpmem --disable-kernel-module && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /var/tmp/xpmem
+ENV CPATH=/usr/local/xpmem/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/xpmem/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/xpmem/lib:$LIBRARY_PATH
+
+# UCX version 1.9.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        binutils-dev \
+        file \
+        libnuma-dev \
+        make \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://github.com/openucx/ucx/releases/download/v1.9.0/ucx-1.9.0.tar.gz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/ucx-1.9.0.tar.gz -C /var/tmp -z && \
+    cd /var/tmp/ucx-1.9.0 &&   ./configure --prefix=/usr/local/ucx --disable-assertions --disable-debug --disable-doxygen-doc --disable-logging --disable-params-check --enable-optimizations --with-knem --with-rdmacm --with-verbs --with-xpmem --without-cuda && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /var/tmp/ucx-1.9.0 /var/tmp/ucx-1.9.0.tar.gz
+ENV CPATH=/usr/local/ucx/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/ucx/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/ucx/lib:$LIBRARY_PATH \
+    PATH=/usr/local/ucx/bin:$PATH
+
 # Intel Parallel Studio XE
 RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         build-essential \
         cpio && \
     rm -rf /var/lib/apt/lists/*
-COPY intel_tarballs/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz
-COPY ../intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
-RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz -C /var/tmp -z && \
-    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=DEFAULTS/g' \
+COPY ./intel_tarballs/parallel_studio_xe_2020_cluster_edition.tgz /var/tmp/parallel_studio_xe_2020_cluster_edition.tgz
+COPY ./intel_license/COM_L___LXMW-67CW6CHW.lic /var/tmp/license.lic
+RUN mkdir -p /var/tmp && tar -x -f /var/tmp/parallel_studio_xe_2020_cluster_edition.tgz -C /var/tmp -z && \
+    sed -i -e 's/^#\?\(COMPONENTS\)=.*/\1=intel-icc__x86_64;intel-ifort__x86_64;intel-mkl-core__x86_64;intel-ifort-common__noarch;intel-icx__x86_64;intel-icc-common__noarch;intel-icc-common-ps__noarch;intel-mkl-cluster__x86_64;intel-mkl-gnu__x86_64;intel-mkl-doc__noarch;intel-mkl-doc-ps__noarch;intel-mkl-common-ps__noarch;intel-mkl-core-ps__x86_64;intel-mkl-gnu-rt__x86_64;intel-mkl-common__noarch;intel-mkl-core-f__x86_64;intel-mkl-gnu-f__x86_64;intel-mkl-f95-common__noarch;intel-mkl-f__x86_64;intel-mkl-common-f__noarch;intel-mkl-cluster-c__noarch;intel-mkl-common-c-ps__noarch;intel-mkl-core-c__x86_64;intel-mkl-gnu-c__x86_64;intel-mkl-common-c__noarch;intel-mpi-rt__x86_64;intel-mpi-sdk__x86_64;intel-mpi-installer-license__x86_64;intel-mpi-psxe__x86_64;intel-mpi-rt-psxe__x86_64;intel-mkl-psxe__noarch;intel-ippcp-psxe__noarch;intel-psxe-common__noarch;intel-ippcp-psxe__noarch;intel-psxe-licensing__noarch;intel-icsxe-pset;intel-icsxe__noarch;intel-imb__x86_64;intel-ips__noarch;intel-ipsc__noarch;intel-ipsf__noarch;intel-openmp__x86_64;intel-openmp-common__noarch;intel-openmp-common-icc__noarch;intel-openmp-common-ifort__noarch;intel-openmp-ifort__x86_64;intel-comp__x86_64;intel-comp-l-all-common__noarch;intel-comp-l-all-vars__noarch;intel-comp-nomcu-vars__noarch;intel-comp-ps__x86_64;intel-comp-ps-ss-bec__x86_64;intel-gdb__x86_64;intel-gdb-source__noarch;intel-gdb-common__noarch;intel-gdb-common-ps__noarch/g' \
         -e 's|^#\?\(PSET_INSTALL_DIR\)=.*|\1=/opt/intel|g' \
         -e 's/^#\?\(ACCEPT_EULA\)=.*/\1=accept/g' \
         -e 's/^#\?\(ACTIVATION_TYPE\)=.*/\1=license_file/g' \
-        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2019_update5_cluster_edition/silent.cfg && \
-    cd /var/tmp/parallel_studio_xe_2019_update5_cluster_edition && ./install.sh --silent=silent.cfg && \
-    rm -rf /var/tmp/parallel_studio_xe_2019_update5_cluster_edition.tgz /var/tmp/parallel_studio_xe_2019_update5_cluster_edition
+        -e 's|^#\?\(ACTIVATION_LICENSE_FILE\)=.*|\1=/var/tmp/license.lic|g' /var/tmp/parallel_studio_xe_2020_cluster_edition/silent.cfg && \
+    cd /var/tmp/parallel_studio_xe_2020_cluster_edition && ./install.sh --silent=silent.cfg && \
+    rm -rf /var/tmp/parallel_studio_xe_2020_cluster_edition.tgz /var/tmp/parallel_studio_xe_2020_cluster_edition
 RUN echo "source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64" >> /etc/bash.bashrc
 
 # CMake version 3.17.2
@@ -137,7 +242,7 @@ ENV BOOST_ROOT=/opt/jedi \
 RUN cd /root && \
     git clone https://github.com/jcsda/jedi-stack.git && \
     cd jedi-stack/buildscripts && \
-    git checkout develop && \
+    git checkout 1.0.0 && \
     ./build_stack.sh "container-intel-impi-app" && \
     mv ../jedi-stack-contents.log /etc && \
     chmod a+r /etc/jedi-stack-contents.log && \
@@ -158,7 +263,7 @@ ENV LD_LIBRARY_PATH=/opt/intel/compilers_and_libraries_2019/linux/lib/intel64_li
 
 COPY ssh-key/github_academy_rsa /root/github_academy_rsa
 
-RUN DOCKERSHELL BASH
+SHELL ["/bin/bash", "-c"]
 
 RUN source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64 && \
     mkdir -p /root/.ssh && \
@@ -172,17 +277,19 @@ RUN source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64 
     cd /opt/jedi/fv3-bundle && \
     git clone git@github.com:jcsda/fv3-bundle.git && \
     cd /opt/jedi/fv3-bundle/fv3-bundle && \
-    git clone git@github.com:jcsda/fckit.git -b develop && \
-    git clone git@github.com:jcsda/atlas.git -b develop && \
-    git clone git@github.com:jcsda/crtm.git -b develop && \
-    git clone git@github.com:jcsda/saber.git -b develop && \
-    git clone git@github.com:jcsda/oops.git -b develop && \
-    git clone git@github.com:jcsda/ioda.git -b develop && \
-    git clone git@github.com:jcsda/ufo.git -b develop && \
-    git clone git@github.com:jcsda/fms.git -b dev/master-ecbuild && \
-    git clone git@github.com:jcsda/femps.git -b develop && \
-    git clone git@github.com:jcsda/fv3-jedi-linearmodel.git -b develop fv3-jedi-lm && \
-    git clone git@github.com:jcsda/fv3-jedi.git -b develop && \
+    git checkout 1.0.0 && \
+    git clone git@github.com:jcsda/fckit.git -b 0.7.jcsda && \
+    git clone git@github.com:jcsda/atlas.git -b 0.20.jcsda && \
+    git clone git@github.com:jcsda/crtm.git -b v2.3-jedi && \
+    git clone git@github.com:jcsda/saber.git -b 1.0.0 && \
+    git clone git@github.com:jcsda/oops.git -b 1.0.0 && \
+    git clone git@github.com:jcsda/ioda.git -b 1.0.0 && \
+    git clone git@github.com:jcsda/ufo.git -b 1.0.0 && \
+    git clone git@github.com:jcsda/fms.git -b 1.0.0.jcsda && \
+    git clone git@github.com:jcsda/GFDL_atmos_cubed_sphere.git -b 1.0.0.jcsda && \
+    git clone git@github.com:jcsda/femps.git -b 1.0.0 && \
+    git clone git@github.com:jcsda/fv3-jedi-linearmodel.git -b 1.0.0 fv3-jedi-lm && \
+    git clone git@github.com:jcsda/fv3-jedi.git -b 1.0.0 && \
     mkdir -p /opt/jedi/fv3-bundle/build && \
     cd /opt/jedi/fv3-bundle/build && \
     ecbuild --build=Release ../fv3-bundle && \
@@ -255,6 +362,62 @@ RUN apt-get update -y && \
         wish \
         xserver-xorg && \
     rm -rf /var/lib/apt/lists/*
+
+# Mellanox OFED version 4.5-1.0.1.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gnupg \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - && \
+    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/4.5-1.0.1.0/ubuntu18.04/mellanox_mlnx_ofed.list && \
+    apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ibverbs-utils \
+        libibmad \
+        libibmad-devel \
+        libibumad \
+        libibumad-devel \
+        libibverbs-dev \
+        libibverbs1 \
+        libmlx4-1 \
+        libmlx4-dev \
+        libmlx5-1 \
+        libmlx5-dev \
+        librdmacm-dev \
+        librdmacm1 && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libpmi0 \
+        libpmi0-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# SLURM PMI2
+COPY --from=0 /usr/local/slurm-pmi2 /usr/local/slurm-pmi2
+
+# KNEM
+COPY --from=0 /usr/local/knem /usr/local/knem
+ENV CPATH=/usr/local/knem/include:$CPATH
+
+# XPMEM
+COPY --from=0 /usr/local/xpmem /usr/local/xpmem
+ENV CPATH=/usr/local/xpmem/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/xpmem/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/xpmem/lib:$LIBRARY_PATH
+
+# UCX
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libbinutils && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=0 /usr/local/ucx /usr/local/ucx
+ENV CPATH=/usr/local/ucx/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/ucx/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/ucx/lib:$LIBRARY_PATH \
+    PATH=/usr/local/ucx/bin:$PATH
 
 RUN echo "export PATH=/usr/local/bin:/usr/local/jedi/bin:$PATH" >> /etc/bash.bashrc && \
     echo "export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/jedi/lib:$LD_LIBRARY_PATH" >> /etc/bash.bashrc && \

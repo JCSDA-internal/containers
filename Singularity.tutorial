@@ -31,9 +31,8 @@ SPECIES JEDI
     git config --global --add credential.helper 'store'
     git lfs install
     cd /opt/jedi
-    git clone git@github.com:jcsda-internal/fv3-bundle.git
+    git clone -b 1.0.0 git@github.com:jcsda/fv3-bundle.git
     cd fv3-bundle
-    git checkout release/master-only
     git clone https://github.com/jcsda/crtm.git -b v2.3-jedi --depth=1
     git clone https://github.com/jcsda/fv3-jedi-linearmodel.git -b 1.0.0 --depth=1 fv3-jedi-lm
     git clone https://github.com/jcsda/fv3-jedi.git -b 1.0.0 --depth=1
