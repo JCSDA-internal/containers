@@ -26,7 +26,7 @@ The first step in building your own JEDI Intel Development Container is to clone
 
 ```
 git clone https://github.com/jcsda-internal/containers.git
-cd containers
+cd containers/myIntel
 ```
 
 Then enter the following command and respond to the questions - by default it will only build a Docker container but you can also build a Singularity container and/or a Charliecloud container if you wish:
