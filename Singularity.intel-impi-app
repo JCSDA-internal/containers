@@ -1,0 +1,18 @@
+BootStrap: localimage
+From: containers/jedi-intel-impi-dev_mlnx.sif
+Stage: build
+
+%labels
+MAINTAINER Mark Miesch
+SPECIES JEDI
+
+%post
+    echo "this is a test" >> /root/mytest
+
+Bootstrap: docker
+From: jcsda/docker_base-intel-impi-dev:latest
+Stage: final
+
+# test copying a file from Stage 1
+%files from build
+  /root/mytest /root/mytest
