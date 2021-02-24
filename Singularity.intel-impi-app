@@ -48,6 +48,8 @@ SPECIES JEDI
     ecbuild --build=Release ../fv3-bundle
     make -j4
     ctest -R get_
+    cd /opt/jedi/build/test_data
+    find . -type f -name "*.tar.gz" -delete
 
 Bootstrap: docker
 From: jcsda/docker_base-intel-impi-dev:latest
