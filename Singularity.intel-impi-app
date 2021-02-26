@@ -1,5 +1,5 @@
 BootStrap: localimage
-From: containers/jedi-intel-impi-dev_mlnx.sif
+From: containers/jedi-intel-impi-devapp_mlnx.sif
 Stage: build
 
 %labels
@@ -92,3 +92,20 @@ Stage: final
       intel-oneapi-runtime-vpl \
       intel-hpckit-runtime
    ln -s /opt/intel/oneapi/setvars.sh /etc/profile.d/intel.sh
+
+# set environment variables
+%environment
+    export I_MPI_THREAD_SPLIT=1
+    export I_MPI_LIBRARY_KIND='release_mt'
+    export NETCDF=/opt/jedistack
+    export PNETCDF=/opt/jedistack
+    export HDF5_ROOT=/opt/jedistack
+    export PIO=/opt/jedistack
+    export BOOST_ROOT=/opt/jedistack
+    export EIGEN3_INCLUDE_DIR=/opt/jedistack
+    export PATH=/opt/jedistack/bin:/usr/local/bin:$PATH
+    export LD_LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:$LD_LIBRARY_PATH
+    export LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:$LIBRARY_PATH
+    export CPATH=/opt/jedistack/include:/usr/local/include:$CPATH
+    export PYTHONPATH=/opt/jedistack/lib:/usr/local/lib:$PYTHONPATH
+
