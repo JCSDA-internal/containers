@@ -15,8 +15,8 @@ SPECIES JEDI
     CMAKE_CXX_COMPILER=mpiicpc 
     CMAKE_Fortran_COMPILER=mpiifort 
     CMAKE_Platform=linux.intel
-    CMAKE_PREFIX_PATH=/usr/local 
-    NETCDF=/usr/local
+    CMAKE_PREFIX_PATH=/opt/jedistack
+    NETCDF=/opt/jedistack
     CC=mpiicc
     CXX=mpiicpc
     FC=mpiifort
@@ -26,16 +26,16 @@ SPECIES JEDI
     SERIAL_CC=icc
     SERIAL_CXX=icpc
     SERIAL_FC=ifort
-    PNETCDF=/usr/local
-    HDF5_ROOT=/usr/local
-    PIO=/usr/local
-    BOOST_ROOT=/usr/local
-    EIGEN3_INCLUDE_DIR=/usr/local
-    PATH=/usr/local/bin:$PATH
-    LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-    LIBRARY_PATH=/usr/local/lib:$LIBRARY_PATH
-    CPATH=/usr/local/include:$CPATH
-    PYTHONPATH=/usr/local/lib:$PYTHONPATH
+    PNETCDF=/opt/jedistack
+    HDF5_ROOT=/opt/jedistack
+    PIO=/opt/jedistack
+    BOOST_ROOT=/opt/jedistack
+    EIGEN3_INCLUDE_DIR=/opt/jedistack
+    PATH=/opt/jedistack/bin:/usr/local/bin:$PATH
+    LD_LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:$LD_LIBRARY_PATH
+    LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:$LIBRARY_PATH
+    CPATH=/opt/jedistack/include:/usr/local/include:$CPATH
+    PYTHONPATH=/opt/jedistack/lib:/usr/local/lib:$PYTHONPATH
     mkdir -p /opt/jedi
     cd /opt/jedi
     git clone https://github.com/jcsda/fv3-bundle.git
@@ -58,6 +58,7 @@ Stage: final
 # test copying a file from Stage 1
 %files from build
    /opt/jedi
+   /opt/jedistack
 
 # install intel runtime libraries
 %post
