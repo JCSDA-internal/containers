@@ -6,6 +6,9 @@ Stage: build
 MAINTAINER Mark Miesch
 SPECIES JEDI
 
+%files
+    examples/hello_world_mpi.c /root/hello_world_mpi.c
+
 # build fv3-bundle
 %post -c /bin/bash
     . /etc/profile
@@ -50,6 +53,7 @@ SPECIES JEDI
     ctest -R get_
     cd /opt/jedi/build/test_data
     find . -type f -name "*.tar.gz" -delete
+    mpiicc /root/hello_world_mpi.c -o /opt/jedistack/bin/hello_world_mpi -lstdc++
 
 Bootstrap: docker
 From: jcsda/docker_base-intel-impi-dev:latest
