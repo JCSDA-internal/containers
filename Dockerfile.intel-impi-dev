@@ -125,7 +125,7 @@ RUN . /etc/profile \
     && rm -rf /root/.ssh
 
 #Make a non-root user:jedi / group:jedi for running MPI
-RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi && \
+RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi --uid 43891 && \
     echo "export FC=mpiifort" >> ~jedi/.bashrc && \
     echo "export CC=mpiicc" >> ~jedi/.bashrc && \
     echo "export CXX=mpiicpc" >> ~jedi/.bashrc && \
