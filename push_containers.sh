@@ -92,9 +92,9 @@ if [[ $ans == y ]] ; then
           echo "Saving previous container as revert"
 	        aws s3 mv s3://data.jcsda.org/containers/ch-jedi-${CNAME}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CNAME}-revert.tar.gz
         fi
-        aws s3 cp containers/ch-${CNAME}\:${TAG}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CNAME}.tar.gz
+        aws s3 cp containers/ch-jedi-${CNAME}\:${TAG}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CNAME}.tar.gz
     else
-      aws s3 cp containers/ch-${CNAME}\:${TAG}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CNAME}-${TAG}.tar.gz
+      aws s3 cp containers/ch-jedi-${CNAME}\:${TAG}.tar.gz s3://data.jcsda.org/containers/ch-jedi-${CNAME}-${TAG}.tar.gz
     fi
   fi
 else
@@ -138,9 +138,9 @@ if [[ $ans == y ]] ; then
       else
         echo "Not making backup image on sylabs cloud"
       fi
-      singularity push containers/jedi-$CNAME_${TAG}.sif library://jcsda/public/jedi-$CNAME:latest
+      singularity push containers/jedi-${CNAME}_${TAG}.sif library://jcsda/public/jedi-${CNAME}:latest
     else
-      singularity push containers/jedi-$CNAME_${TAG}.sif library://jcsda/public/jedi-$CNAME:${TAG}
+      singularity push containers/jedi-${CNAME}_${TAG}.sif library://jcsda/public/jedi-${CNAME}:${TAG}
     fi
 
   fi

@@ -15,7 +15,7 @@ SPECIES JEDI
     export GIT_MERGE_AUTOEDIT
     export LANG=en_US.UTF-8
     export LANGUAGE=en_US:en
-    export PATH=/usr/local/bin:/usr/local/miniconda3/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/PanoplyJ
+    export PATH=/usr/local/bin:/usr/local/miniconda3/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
     alias pip=/usr/local/miniconda3/bin/pip
 
 %post
@@ -31,10 +31,6 @@ SPECIES JEDI
     conda install -c conda-forge netcdf4
     conda install -c conda-forge xarray
     conda install -c conda-forge cartopy
-    cd /opt
-    wget https://www.giss.nasa.gov/tools/panoply/download/PanoplyJ-4.12.2.tgz
-    tar xvf PanoplyJ-4.12.2.tgz
-    rm PanoplyJ-4.12.2.tgz
     apt-get update
     apt-get install -y --no-install-recommends feh
     apt-get install -y --no-install-recommends default-jre
