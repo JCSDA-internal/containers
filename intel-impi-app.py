@@ -29,7 +29,7 @@ baselibs = apt_get(ospackages=['tcsh','csh','ksh', 'openssh-server','libncurses-
                               'libxml2-dev','unzip','wish','curl','wget','time','emacs',
                               'libcurl4-openssl-dev','nano','screen','lsb-release',
                               'libgmp-dev','libmpfr-dev','libboost-thread-dev',
-                              'autoconf','pkg-config','clang-tidy'])])
+                              'autoconf','pkg-config','clang-tidy'])
 Stage0 += baselibs
 
 # get an up-to-date version of CMake
@@ -68,9 +68,9 @@ if (with_hpcx):
 if (psm.lower() == "true"):
     psm = apt_get(ospackages=['libpsm-infinipath1','libpsm-infinipath1-dev'])
     Stage0 += psm
-    withpsm=True
+    with_psm=True
 else:
-    withpsm=False
+    with_psm=False
 
 # UCX and components
 kn = knem()

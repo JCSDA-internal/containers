@@ -22,11 +22,6 @@ function get_ans {
 
 set -ex
 
-if [[ $# -lt 1 ]]; then
-   echo "usage: build_intel_app_container.sh <name> <tag> <hpc>"
-   exit 1
-fi
-
 CNAME=${1:-"intel-impi-app"}
 TAG=${2:-"beta"}
 HPC=${3:-"0"}
@@ -39,11 +34,11 @@ echo "Building Intel application container "
 # create the Dockerfile
 case ${HPC} in
     "0")
-        hpccm --recipe ${CNAME}.py --format singularity > Singularity.$CNAME
+        hpccm --recipe ${CNAME}.py --format docker > Dockerfile.$CNAME
         ;;
     "1")
         hpccm --recipe ${CNAME}.py --userarg mellanox="True" \
-                                             --format singularity > Singularity.$CNAME
+                                             --format docker > Dockerfile.$CNAME
         ;;
     *)
         echo "ERROR: unsupported HPC option"
@@ -52,7 +47,19 @@ case ${HPC} in
 esac
 
 echo "=============================================================="
+echo "   Building Docker Image"
+echo "=============================================================="
+
+# process the Dockerfile to change to bash shell
+#sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
+
+# build the Docker image
+rm -f docker_build.log
+sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME}:${TAG} context 2>&1 | tee docker_build.log
+
+echo "=============================================================="
 echo "   Building Singularity Image"
 echo "=============================================================="
-rm -f singularity_build.log
-sudo singularity build containers/jedi-${CNAME}.sif Singularity.${CNAME} 2>&1 | tee singularity_build.log
+#rm -f singularity_build.log
+#sudo singularity build containers/jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:${TAG} 2>&1 | tee singularity_build.log
+
