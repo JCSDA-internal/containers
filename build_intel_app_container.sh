@@ -51,7 +51,7 @@ echo "   Building Docker Image"
 echo "=============================================================="
 
 # process the Dockerfile to change to bash shell
-#sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
+sed -i '/DOCKERSHELL/c\SHELL ["/bin/bash", "-c"]' Dockerfile.${CNAME}
 
 # build the Docker image
 rm -f docker_build.log
