@@ -10,7 +10,7 @@ hpccm --recipe intel-oneapi-app.py --userarg mpi="openmpi" mellanox="True" psm="
 """
 
 # Base image
-Stage0.baseimage('ubuntu:20.04')
+Stage0 += baseimage(image='ubuntu:20.04', _as='build')
 
 # get optional user arguments
 mxofed= USERARG.get('mellanox', 'False')
@@ -31,7 +31,7 @@ baselibs = apt_get(ospackages=['tcsh','csh','ksh', 'openssh-server','libncurses-
                               'libxml2-dev','unzip','wish','curl','wget','time','emacs',
                               'libcurl4-openssl-dev','nano','screen','lsb-release',
                               'libgmp-dev','libmpfr-dev','libboost-thread-dev',
-                              'autoconf','pkg-config','clang-tidy'])
+                              'autoconf','pkg-config','clang-tidy','tar'])
 Stage0 += baselibs
 
 # get an up-to-date version of CMake
@@ -85,6 +85,26 @@ Stage0 += x
 u = ucx(ofed=True,knem=True,xpmem=True,cuda=False)
 Stage0 += u
 
+pmilibs=apt_get(ospackages=['default-libmysqlclient-dev',
+        'libfreeipmi-dev',
+        'freeipmi-tools',
+        'libglib2.0-0',
+        'libglib2.0-dev',
+        'libgtk-3-0',
+        'libgtk-3-dev',
+        'libhwloc-dev',
+        'libjson-c-dev',
+        'liblua5.2-0',
+        'liblua5.2-dev',
+        'libmunge-dev',
+        'libmunge2',
+        'libpam0g-dev',
+        'libyaml-dev',
+        'hwloc',
+        'file',
+        'libevent-dev'])
+Stage0 += pmilibs
+
 #--------------------------------------------------------------
 # install Intel OneAPI compilers and MPI
 
@@ -123,7 +143,7 @@ Stage0 += shell(commands=['echo "if [ -z $INTEL_SH_GUARD ]; then" > /etc/profile
 
 Stage0 += shell(commands=['DOCKERSHELL BASH'])
 
-Stage0 += environment(variables={'I_MPI_THREAD_SPLIT':'1', 
+ev = environment(variables={'I_MPI_THREAD_SPLIT':'1', 
                                  'I_MPI_LIBRARY_KIND':'release_mt',
                                  'CMAKE_C_COMPILER':'mpiicc',
                                  'CMAKE_CXX_COMPILER':'mpiicpc',
@@ -145,11 +165,15 @@ Stage0 += environment(variables={'I_MPI_THREAD_SPLIT':'1',
                                  'PIO':'/opt/jedistack',
                                  'BOOST_ROOT':'/opt/jedistack',
                                  'EIGEN3_INCLUDE_DIR':'/opt/jedistack',
-                                 'PATH':'/opt/jedistack/bin:/usr/local/bin:$PATH',
-                                 'LD_LIBRARY_PATH':'/opt/jedistack/lib:/usr/local/lib:/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin/:$LD_LIBRARY_PATH',
-                                 'LIBRARY_PATH':'/opt/jedistack/lib:/usr/local/lib:$LIBRARY_PATH',
-                                 'CPATH':'/opt/jedistack/include:/usr/local/include:$CPATH',
-                                 'PYTHONPATH':'/opt/jedistack/lib:/usr/local/lib:$PYTHONPATH'})
+                                 'PATH':'/opt/jedistack/bin:/usr/local/bin:/usr/local/pmix/bin:$PATH',
+                                 'LD_LIBRARY_PATH':'/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x87_64-linux-gnu:'
+                                 +'/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin/'
+                                 +'/usr/local/pmix/lib:$LD_LIBRARY_PATH',
+                                 'LIBRARY_PATH':'/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH',
+                                 'CPATH':'/opt/jedistack/include:/usr/local/include:/usr/include:/usr/local/pmix/include:$CPATH',
+                                 'PYTHONPATH':'/opt/jedistack/lib:/usr/local/lib:$PYTHONPATH',
+                                 'PKG_CONFIG_PATH':'/usr/lib/x86_64-linux-gnu/pkgconfig'})
+Stage0 += ev
 
 Stage0 += shell(commands=['source /etc/profile','cd /root',
     'git clone https://github.com/jcsda/jedi-stack.git',
@@ -164,76 +188,118 @@ Stage0 += shell(commands=['source /etc/profile','cd /root',
     'rm -rf /root/jedi-stack',
     'mkdir /worktmp'])
 
-#--------------------------------------------------------------
-# install PMI after the stack so it can take advantage of hd5, pmix, netloc
+#------------------------------------------------------------------------------
+# Install JEDI
 
-if (pmi0.lower() == "true"):
-    pm0 = apt_get(ospackages=['libpmi0','libpmi0-dev'])
-    Stage0 += pm0
+Stage0 += copy(src='hello_world_mpi.c',dest='/root/hello_world_mpi.c')
 
-# Install Slurm PMI2 library always
-#pmi2 = slurm_pmi2(version='19.05.4',ospackages=['libgtk-3-0','libgtk-3-dev',
-#              'libglib2.0-0','libglib2.0-dev','liblua5.2-0','liblua5.2-dev',
-#              'libmunge2','libmunge-dev','libyaml-dev','libhwloc-dev','libjson-c-dev',
-#              'libfreeipmi-dev','default-libmysqlclient-dev','libpam0g-dev',
-#              'libfreeipmi-dev'],with_hdf5='/opt/jedistack/lib')
-#Stage0 += pmi2
+Stage0 += shell(commands=[
+    'source /etc/profile',
+    'mkdir -p /opt/jedi',
+    'cd /opt/jedi',
+    'git clone https://github.com/jcsda/fv3-bundle.git',
+    'cd /opt/jedi/fv3-bundle',
+    'git checkout develop',
+    'git clone https://github.com/jcsda/crtm.git -b v2.3-jedi',
+    'mkdir -p /opt/jedi/build','cd /opt/jedi/build',
+    'ecbuild --build=Release ../fv3-bundle',
+    'make -j4', 
+    'ctest -R get_',
+    'cd /opt/jedi/build/test_data',
+    'find . -type f -name "*.tar.gz" -delete',
+    'chmod -R 777 /opt/jedi/fv3-bundle',
+    'cd /root',
+    'mpiicc /root/hello_world_mpi.c -o /opt/jedistack/bin/hello_world_mpi -lstdc++'])
 
-pmilibs = apt_get(ospackages=['default-libmysqlclient-dev',
-        'libfreeipmi-dev',
-        'libfreeipmi-dev',
-        'libglib2.0-0',
-        'libglib2.0-dev',
-        'libgtk-3-0',
-        'libgtk-3-dev',
-        'libhwloc-dev',
-        'libjson-c-dev',
-        'liblua5.2-0',
-        'liblua5.2-dev',
-        'libmunge-dev',
-        'libmunge2',
-        'libpam0g-dev',
-        'libyaml-dev'])
-Stage0 += pmilibs
+#------------------------------------------------------------------------------
+# install PMI after the stack so it can take advantage of hdf5
 
-pmi2 = shell(commands=['source /etc/profile',
+# compile and install pmix
+Stage0 += shell(commands=['source /etc/profile',
+          'mkdir -p /var/tmp',
+          'wget -q -nc --no-check-certificate -P /var/tmp https://github.com/openpmix/openpmix/releases/download/v3.1.5/pmix-3.1.5.tar.gz',
+    'tar -x -f /var/tmp/pmix-3.1.5.tar.gz -C /var/tmp -z',
+    'cd /var/tmp/pmix-3.1.5',
+    './configure --prefix=/opt/jedistack/pmix',
+    'make -j$(nproc)',
+    'make -j$(nproc) install',
+    'rm -rf /var/tmp/pmix-3.1.5 /var/tmp/pmix-3.1.5.tar.gz'])
+
+# compile and install slurm-pmi2
+Stage0 += shell(commands=['source /etc/profile',
     'mkdir -p /var/tmp', 
     'wget -q -nc --no-check-certificate -P /var/tmp https://download.schedmd.com/slurm/slurm-19.05.4.tar.bz2',
-    'mkdir -p /var/tmp', 'tar -x -f /var/tmp/slurm-19.05.4.tar.bz2 -C /var/tmp -j',
+    'tar -x -f /var/tmp/slurm-19.05.4.tar.bz2 -C /var/tmp -j',
     'cd /var/tmp/slurm-19.05.4', 
-    './configure --prefix=/opt/jedistack/slurm-pmi2 --with-hdf5=/opt/jedistack/lib',
+    './configure --prefix=/opt/jedistack/slurm-pmi2 --with-hdf5=/opt/jedistack/bin',
     'cd /var/tmp/slurm-19.05.4',
     'make -C contribs/pmi2 install',
     'rm -rf /var/tmp/slurm-19.05.4 /var/tmp/slurm-19.05.4.tar.bz2'])
-Stage0 += pmi2
 
 #==============================================================================
 # Second stage: Runtime
 #==============================================================================
-#Stage1 += baseimage(image='ubuntu:20.04', _as='runtime')
-#
-#Stage1 += bs
-#Stage1 += baselibs
-#Stage1 += lfs
-#Stage1 += pyth
-#Stage1 += shell(commands=['ln -s /usr/bin/python3 /usr/bin/python'])
-#
-#Stage1 += o.runtime()
-#if (with_hpcx):
-#    Stage1 += hp.runtime()
-#
-#if (with_psm):
-#    Stage1 += psm
-#
-#Stage1 += kn.runtime()
-#Stage1 += x.runtime()
-#Stage1 += u.runtime()
-#
-#if (pmi0.lower() == "true"):
-#    Stage1 += pm0
-#
-#Stage1 += pmi2.runtime()
-#
+Stage1 += baseimage(image='ubuntu:20.04', _as='runtime')
+
+Stage1 += copy(_from='build', src='/opt/jedistack', dest='/opt/jedi/jedistack')
+Stage1 += copy(_from='build', src='/opt/jedi', dest='/opt/jedi')
+
+Stage1 += bs
+Stage1 += baselibs
+Stage1 += lfs
+Stage1 += pyth
+Stage1 += shell(commands=['ln -s /usr/bin/python3 /usr/bin/python'])
+
+Stage1 += o.runtime()
+if (with_hpcx):
+    Stage1 += hp.runtime()
+
+if (with_psm):
+    Stage1 += psm
+
+Stage1 += kn.runtime()
+Stage1 += x.runtime()
+Stage1 += u.runtime()
+
 #----------------------------------------------------
-#Stage1 += intelenv
-#Stage1 += intelrepo
+#Stage1 += pmilibs
+
+## optionally install an older pmi - may be needed for some platforms
+#if (pmi0.lower() == "true"):
+#    pm0 = apt_get(ospackages=['libpmi0','libpmi0-dev'])
+#    Stage0 += pm0
+
+#----------------------------------------------------
+# intel runtime
+Stage1 += intelenv
+Stage1 += intelrepo
+
+Stage1 += shell(commands=['DOCKERSHELL BASH'])
+
+Stage1 += shell(commands=['source /etc/profile','apt-get update -y',
+     'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0'
+     +' intel-oneapi-runtime-ccl'
+     +' intel-oneapi-runtime-compilers'
+     +' intel-oneapi-runtime-dnnl'
+     +' intel-oneapi-runtime-dpcpp-cpp'
+     +' intel-oneapi-runtime-dpcpp-library'
+     +' intel-oneapi-runtime-fortran'
+     +' intel-oneapi-runtime-libs'
+     +' intel-oneapi-runtime-mkl'
+     +' intel-oneapi-runtime-mpi'
+     +' intel-oneapi-runtime-opencl'
+     +' intel-oneapi-runtime-openmp'
+     +' intel-oneapi-runtime-tbb'
+     +' intel-oneapi-runtime-vpl'
+     +' intel-hpckit-runtime',
+     'rm -rf /var/lib/apt/lists/*'])
+
+#----------------------------------------------------
+# set some environment variables for bash users
+Stage1 += ev
+Stage1 += shell(commands=['echo "export PATH=$PATH" >> /etc/bash.bashrc',
+    'echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "export LIBRARY_PATH=$LIBRARY_PATH" >> /etc/bash.bashrc',
+    'echo "source /etc/profile" >> /etc/bash.bashrc',
+    'echo "export PYTHONPATH=/usr/local/lib:/opt/jedistack/lib/:$PYTHONPATH" >> /etc/bash.bashrc'])
+
