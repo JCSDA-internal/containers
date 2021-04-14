@@ -278,6 +278,10 @@ Stage1 += shell(commands=['DOCKERSHELL BASH'])
 
 Stage1 += shell(commands=['source /etc/profile','apt-get update -y',
      'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0'
+      +' kmod linux-headers-5.4.0-1041-aws','rm -rf /var/lib/apt/lists/*'])
+
+Stage1 += shell(commands=['source /etc/profile','apt-get update -y',
+     'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0'
      +' intel-oneapi-runtime-ccl'
      +' intel-oneapi-runtime-compilers'
      +' intel-oneapi-runtime-dnnl'

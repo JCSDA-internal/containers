@@ -60,6 +60,7 @@ sudo docker image build -f Dockerfile.${CNAME} -t jedi-${CNAME}:${TAG} context 2
 echo "=============================================================="
 echo "   Building Singularity Image"
 echo "=============================================================="
-#rm -f singularity_build.log
-#sudo singularity build containers/jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:${TAG} 2>&1 | tee singularity_build.log
+rm -f singularity_build.log
+sudo singularity build containers/jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:${TAG} 2>&1 | tee singularity_build.log
+singularity sign containers/jedi-${CNAME}.sif 
 
