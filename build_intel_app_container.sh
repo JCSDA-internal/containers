@@ -23,8 +23,8 @@ function get_ans {
 set -ex
 
 CNAME=${1:-"intel-impi-app"}
-TAG=${2:-"beta"}
-HPC=${3:-"0"}
+TAG=${2:-"mlnx"}
+HPC=${3:-"1"}
 
 # Stop if anything goes wrong
 set -e
@@ -61,6 +61,6 @@ echo "=============================================================="
 echo "   Building Singularity Image"
 echo "=============================================================="
 rm -f singularity_build.log
-sudo singularity build containers/jedi-${CNAME}.sif docker-daemon:jedi-${CNAME}:${TAG} 2>&1 | tee singularity_build.log
-singularity sign containers/jedi-${CNAME}.sif 
+sudo singularity build containers/jedi-${CNAME}_${TAG}.sif docker-daemon:jedi-${CNAME}:${TAG} 2>&1 | tee singularity_build.log
+singularity sign containers/jedi-${CNAME}_${TAG}.sif 
 

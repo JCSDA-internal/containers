@@ -75,24 +75,43 @@ RUN apt-get update -y && \
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# OFED
+# Mellanox OFED version 5.2-1.0.4.0
 RUN apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -t focal \
-        dapl2-utils \
-        ibutils \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gnupg \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - && \
+    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/5.2-1.0.4.0/ubuntu18.04/mellanox_mlnx_ofed.list && \
+    apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         ibverbs-providers \
         ibverbs-utils \
-        infiniband-diags \
-        libdapl-dev \
-        libdapl2 \
         libibmad-dev \
         libibmad5 \
+        libibumad-dev \
+        libibumad3 \
         libibverbs-dev \
         libibverbs1 \
         librdmacm-dev \
-        librdmacm1 \
-        rdmacm-utils && \
+        librdmacm1 && \
     rm -rf /var/lib/apt/lists/*
+
+# Mellanox HPC-X version 2.8.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bzip2 \
+        openssh-client \
+        tar \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://www.mellanox.com/downloads/hpc/hpc-x/v2.8/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz -C /var/tmp -j && \
+    cp -a /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64 /usr/local/hpcx && \
+    echo "source /usr/local/hpcx/hpcx-mt-init-ompi.sh" >> /etc/bash.bashrc && \
+    echo "hpcx_load" >> /etc/bash.bashrc && \
+    rm -rf /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64
 
 # KNEM version 1.1.4
 RUN apt-get update -y && \
@@ -340,24 +359,43 @@ RUN apt-get update -y && \
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# OFED
+# Mellanox OFED version 5.2-1.0.4.0
 RUN apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -t focal \
-        dapl2-utils \
-        ibutils \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gnupg \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - && \
+    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/5.2-1.0.4.0/ubuntu18.04/mellanox_mlnx_ofed.list && \
+    apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         ibverbs-providers \
         ibverbs-utils \
-        infiniband-diags \
-        libdapl-dev \
-        libdapl2 \
         libibmad-dev \
         libibmad5 \
+        libibumad-dev \
+        libibumad3 \
         libibverbs-dev \
         libibverbs1 \
         librdmacm-dev \
-        librdmacm1 \
-        rdmacm-utils && \
+        librdmacm1 && \
     rm -rf /var/lib/apt/lists/*
+
+# Mellanox HPC-X version 2.8.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bzip2 \
+        openssh-client \
+        tar \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://www.mellanox.com/downloads/hpc/hpc-x/v2.8/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz -C /var/tmp -j && \
+    cp -a /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64 /usr/local/hpcx && \
+    echo "source /usr/local/hpcx/hpcx-mt-init-ompi.sh" >> /etc/bash.bashrc && \
+    echo "hpcx_load" >> /etc/bash.bashrc && \
+    rm -rf /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64
 
 # KNEM
 COPY --from=0 /usr/local/knem /usr/local/knem
