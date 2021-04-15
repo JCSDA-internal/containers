@@ -224,7 +224,7 @@ ENV BOOST_ROOT=/opt/jedistack \
     HDF5_ROOT=/opt/jedistack \
     I_MPI_LIBRARY_KIND=release_mt \
     I_MPI_THREAD_SPLIT=1 \
-    LD_LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x87_64-linux-gnu:/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin//usr/local/pmix/lib:$LD_LIBRARY_PATH \
+    LD_LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin//usr/local/pmix/lib:$LD_LIBRARY_PATH \
     LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH \
     MPI_CC=mpiicc \
     MPI_CXX=mpiicpc \
@@ -429,11 +429,10 @@ SHELL ["/bin/bash", "-c"]
 
 RUN source /etc/profile && \
     apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 kmod linux-headers-5.4.0-1041-aws && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 kmod linux-headers-5.4.0-1041-aws libnuma-dev && \
     rm -rf /var/lib/apt/lists/*
 
-RUN source /etc/profile && \
-    apt-get update -y && \
+RUN apt-get update -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 intel-oneapi-runtime-ccl intel-oneapi-runtime-compilers intel-oneapi-runtime-dnnl intel-oneapi-runtime-dpcpp-cpp intel-oneapi-runtime-dpcpp-library intel-oneapi-runtime-fortran intel-oneapi-runtime-libs intel-oneapi-runtime-mkl intel-oneapi-runtime-mpi intel-oneapi-runtime-opencl intel-oneapi-runtime-openmp intel-oneapi-runtime-tbb intel-oneapi-runtime-vpl intel-hpckit-runtime && \
     rm -rf /var/lib/apt/lists/*
 
@@ -451,7 +450,7 @@ ENV BOOST_ROOT=/opt/jedistack \
     HDF5_ROOT=/opt/jedistack \
     I_MPI_LIBRARY_KIND=release_mt \
     I_MPI_THREAD_SPLIT=1 \
-    LD_LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x87_64-linux-gnu:/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin//usr/local/pmix/lib:$LD_LIBRARY_PATH \
+    LD_LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin//usr/local/pmix/lib:$LD_LIBRARY_PATH \
     LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH \
     MPI_CC=mpiicc \
     MPI_CXX=mpiicpc \
@@ -466,8 +465,8 @@ ENV BOOST_ROOT=/opt/jedistack \
     SERIAL_CXX=icpc \
     SERIAL_FC=ifort
 
-RUN echo "export PATH=$PATH" >> /etc/bash.bashrc && \
-    echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /etc/bash.bashrc && \
-    echo "export LIBRARY_PATH=$LIBRARY_PATH" >> /etc/bash.bashrc && \
-    echo "source /etc/profile" >> /etc/bash.bashrc && \
-    echo "export PYTHONPATH=/usr/local/lib:/opt/jedistack/lib/:$PYTHONPATH" >> /etc/bash.bashrc
+RUN echo "if [ -z $INTEL_SH_GUARD ]; then" > /etc/profile.d/intel.sh && \
+    echo "    source /opt/intel/oneapi/setvars.sh -i_mpi_library_kind=release_mt" >> /etc/profile.d/intel.sh && \
+    echo "fi" >> /etc/profile.d/intel.sh && \
+    echo "export INTEL_SH_GUARD=1" >> /etc/profile.d/intel.sh && \
+    chmod a+x /etc/profile.d/intel.sh

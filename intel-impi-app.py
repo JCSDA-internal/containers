@@ -25,7 +25,7 @@ Stage0 += bs
 
 # useful system tools
 # libexpat is required by udunits
-baselibs = apt_get(ospackages=['tcsh','csh','ksh', 'openssh-server','libncurses-dev',
+baselibs = packages(apt=['tcsh','csh','ksh', 'openssh-server','libncurses-dev',
                               'libssl-dev','libx11-dev','less','man-db','tk','tcl','swig',
                               'bc','file','flex','bison','libexpat1-dev', 'git','vim',
                               'libxml2-dev','unzip','wish','curl','wget','time','emacs',
@@ -45,7 +45,7 @@ lfs = shell(commands=
 Stage0 += lfs
 
 # python3
-pyth = apt_get(ospackages=['python3-pip','python3-dev','python3-yaml',
+pyth = packages(apt=['python3-pip','python3-dev','python3-yaml',
                               'python3-scipy'])
 Stage0 += pyth
 Stage0 += shell(commands=['ln -s /usr/bin/python3 /usr/bin/python'])
@@ -69,7 +69,7 @@ if (with_hpcx):
 
 # PSM library
 if (psm.lower() == "true"):
-    psm = apt_get(ospackages=['libpsm-infinipath1','libpsm-infinipath1-dev'])
+    psm = packages(apt=['libpsm-infinipath1','libpsm-infinipath1-dev'])
     Stage0 += psm
     with_psm=True
 else:
@@ -85,7 +85,7 @@ Stage0 += x
 u = ucx(ofed=True,knem=True,xpmem=True,cuda=False)
 Stage0 += u
 
-pmilibs=apt_get(ospackages=['default-libmysqlclient-dev',
+pmilibs=packages(apt=['default-libmysqlclient-dev',
         'libfreeipmi-dev',
         'freeipmi-tools',
         'libglib2.0-0',
@@ -132,11 +132,12 @@ Stage0 += shell(commands=['apt-get update -y',
      ' intel-oneapi-mkl-devel',
      'rm -rf /var/lib/apt/lists/*'])
 
-Stage0 += shell(commands=['echo "if [ -z $INTEL_SH_GUARD ]; then" > /etc/profile.d/intel.sh',
+inp = shell(commands=['echo "if [ -z $INTEL_SH_GUARD ]; then" > /etc/profile.d/intel.sh',
      'echo "    source /opt/intel/oneapi/setvars.sh -i_mpi_library_kind=release_mt" >> /etc/profile.d/intel.sh',
      'echo "fi" >> /etc/profile.d/intel.sh',
      'echo "export INTEL_SH_GUARD=1" >> /etc/profile.d/intel.sh',
      'chmod a+x /etc/profile.d/intel.sh'])
+Stage0 += inp
 
 #--------------------------------------------------------------
 # Build jedi-stack
@@ -166,7 +167,7 @@ ev = environment(variables={'I_MPI_THREAD_SPLIT':'1',
                                  'BOOST_ROOT':'/opt/jedistack',
                                  'EIGEN3_INCLUDE_DIR':'/opt/jedistack',
                                  'PATH':'/opt/jedistack/bin:/usr/local/bin:/usr/local/pmix/bin:$PATH',
-                                 'LD_LIBRARY_PATH':'/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x87_64-linux-gnu:'
+                                 'LD_LIBRARY_PATH':'/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:'
                                  +'/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin/'
                                  +'/usr/local/pmix/lib:$LD_LIBRARY_PATH',
                                  'LIBRARY_PATH':'/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH',
@@ -265,9 +266,9 @@ Stage1 += u.runtime()
 #Stage1 += pmilibs
 
 ## optionally install an older pmi - may be needed for some platforms
-#if (pmi0.lower() == "true"):
-#    pm0 = apt_get(ospackages=['libpmi0','libpmi0-dev'])
-#    Stage0 += pm0
+if (pmi0.lower() == "true"):
+    pm0 = packages(apt=['libpmi0','libpmi0-dev'])
+    Stage1 += pm0
 
 #----------------------------------------------------
 # intel runtime
@@ -278,9 +279,9 @@ Stage1 += shell(commands=['DOCKERSHELL BASH'])
 
 Stage1 += shell(commands=['source /etc/profile','apt-get update -y',
      'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0'
-      +' kmod linux-headers-5.4.0-1041-aws','rm -rf /var/lib/apt/lists/*'])
+      +' kmod linux-headers-5.4.0-1041-aws libnuma-dev','rm -rf /var/lib/apt/lists/*'])
 
-Stage1 += shell(commands=['source /etc/profile','apt-get update -y',
+Stage1 += shell(commands=['apt-get update -y',
      'DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0'
      +' intel-oneapi-runtime-ccl'
      +' intel-oneapi-runtime-compilers'
@@ -299,11 +300,6 @@ Stage1 += shell(commands=['source /etc/profile','apt-get update -y',
      'rm -rf /var/lib/apt/lists/*'])
 
 #----------------------------------------------------
-# set some environment variables for bash users
+# set some environment variables
 Stage1 += ev
-Stage1 += shell(commands=['echo "export PATH=$PATH" >> /etc/bash.bashrc',
-    'echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /etc/bash.bashrc',
-    'echo "export LIBRARY_PATH=$LIBRARY_PATH" >> /etc/bash.bashrc',
-    'echo "source /etc/profile" >> /etc/bash.bashrc',
-    'echo "export PYTHONPATH=/usr/local/lib:/opt/jedistack/lib/:$PYTHONPATH" >> /etc/bash.bashrc'])
-
+Stage1 += inp

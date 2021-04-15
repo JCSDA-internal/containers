@@ -23,8 +23,8 @@ function get_ans {
 set -ex
 
 CNAME=${1:-"intel-impi-app"}
-TAG=${2:-"mlnx"}
-HPC=${3:-"1"}
+TAG=${2:-"beta"}
+HPC=${3:-"0"}
 
 # Stop if anything goes wrong
 set -e
