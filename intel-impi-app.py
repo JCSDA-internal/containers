@@ -144,7 +144,7 @@ Stage0 += inp
 
 Stage0 += shell(commands=['DOCKERSHELL BASH'])
 
-ev = environment(variables={'I_MPI_THREAD_SPLIT':'1', 
+ev = environment(variables={'I_MPI_THREAD_SPLIT':'1',
                                  'I_MPI_LIBRARY_KIND':'release_mt',
                                  'CMAKE_C_COMPILER':'mpiicc',
                                  'CMAKE_CXX_COMPILER':'mpiicpc',
@@ -204,7 +204,7 @@ Stage0 += shell(commands=[
     'git clone https://github.com/jcsda/crtm.git -b v2.3-jedi',
     'mkdir -p /opt/jedi/build','cd /opt/jedi/build',
     'ecbuild --build=Release ../fv3-bundle',
-    'make -j4', 
+    'make -j4',
     'ctest -R get_',
     'cd /opt/jedi/build/test_data',
     'find . -type f -name "*.tar.gz" -delete',
@@ -228,10 +228,10 @@ Stage0 += shell(commands=['source /etc/profile',
 
 # compile and install slurm-pmi2
 Stage0 += shell(commands=['source /etc/profile',
-    'mkdir -p /var/tmp', 
+    'mkdir -p /var/tmp',
     'wget -q -nc --no-check-certificate -P /var/tmp https://download.schedmd.com/slurm/slurm-19.05.4.tar.bz2',
     'tar -x -f /var/tmp/slurm-19.05.4.tar.bz2 -C /var/tmp -j',
-    'cd /var/tmp/slurm-19.05.4', 
+    'cd /var/tmp/slurm-19.05.4',
     './configure --prefix=/opt/jedistack/slurm-pmi2 --with-hdf5=/opt/jedistack/bin',
     'cd /var/tmp/slurm-19.05.4',
     'make -C contribs/pmi2 install',
@@ -242,7 +242,7 @@ Stage0 += shell(commands=['source /etc/profile',
 #==============================================================================
 Stage1 += baseimage(image='ubuntu:20.04', _as='runtime')
 
-Stage1 += copy(_from='build', src='/opt/jedistack', dest='/opt/jedi/jedistack')
+Stage1 += copy(_from='build', src='/opt/jedistack', dest='/opt/jedistack')
 Stage1 += copy(_from='build', src='/opt/jedi', dest='/opt/jedi')
 
 Stage1 += bs
