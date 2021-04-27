@@ -32,7 +32,7 @@ cat > ${MODFILE} <<EOF
 proc ModulesHelp { } {
         puts stderr "Load jedi stack"
 }
-setenv "SINGULARITYENV_PATH" "${PATH}
+setenv "SINGULARITYENV_PATH" "${PATH}"
 setenv "SINGULARITYENV_LD_LIBRARY_PATH" "${LD_LIBRARY_PATH}"
 setenv "SINGULARITYENV_LIBRARY_PATH" "${LIBRARY_PATH}"
 setenv "SINGULARITYENV_CPATH" "${CPATH}"
