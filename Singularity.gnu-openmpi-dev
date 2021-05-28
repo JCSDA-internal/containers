@@ -5,9 +5,6 @@ From: jcsda/docker-gnu-openmpi-dev:latest
 MAINTAINER Mark Miesch
 SPECIES JEDI
 
-%files
-    ssh-key/github_academy_rsa /root/github_academy_rsa
-
 %environment
     TERM=xterm
     export TERM
@@ -34,17 +31,6 @@ SPECIES JEDI
     apt-get update
     apt-get install -y --no-install-recommends feh
     apt-get install -y --no-install-recommends default-jre
-    mkdir -p /root/.ssh
-    mv /root/github_academy_rsa /root/.ssh/github_academy_rsa
-    eval "$(ssh-agent -s)"
-    ssh-add /root/.ssh/github_academy_rsa
-    ssh -T -o "StrictHostKeyChecking=no" git@github.com || mkdir -p /opt/jedi
-    cd /opt/jedi
-    git clone git@github.com:jcsda-internal/ioda-plots.git
-    cd ioda-plots
-    git checkout feature/cris
-    /usr/local/miniconda3/bin/pip install -e .
-    rm /root/.ssh/github_academy_rsa
     rm -rf /var/lib/apt/lists/*
 
 %runscript

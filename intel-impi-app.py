@@ -179,7 +179,7 @@ Stage0 += ev
 Stage0 += shell(commands=['source /etc/profile','cd /root',
     'git clone https://github.com/jcsda/jedi-stack.git',
     'cd jedi-stack/buildscripts',
-    'git checkout feature/intel-oneapi-app',
+    'git checkout develop',
     './build_stack.sh "container-intel-impi-app"',
     'mv ../jedi-stack-contents.log /etc',
     'chmod a+r /etc/jedi-stack-contents.log',
