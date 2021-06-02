@@ -1,0 +1,472 @@
+FROM ubuntu:20.04 AS build
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 build-essential pkg-config ca-certificates gnupg apt-utils && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        autoconf \
+        bc \
+        bison \
+        clang-tidy \
+        csh \
+        curl \
+        emacs \
+        file \
+        flex \
+        git \
+        ksh \
+        less \
+        libboost-thread-dev \
+        libcurl4-openssl-dev \
+        libexpat1-dev \
+        libgmp-dev \
+        libmpfr-dev \
+        libncurses-dev \
+        libssl-dev \
+        libx11-dev \
+        libxml2-dev \
+        lsb-release \
+        man-db \
+        nano \
+        openssh-server \
+        pkg-config \
+        screen \
+        swig \
+        tar \
+        tcl \
+        tcsh \
+        time \
+        tk \
+        unzip \
+        vim \
+        wget \
+        wish && \
+    rm -rf /var/lib/apt/lists/*
+
+# CMake version 3.19.2
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        make \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://cmake.org/files/v3.19/cmake-3.19.2-Linux-x86_64.sh && \
+    mkdir -p /usr/local && \
+    /bin/sh /var/tmp/cmake-3.19.2-Linux-x86_64.sh --prefix=/usr/local --skip-license && \
+    rm -rf /var/tmp/cmake-3.19.2-Linux-x86_64.sh
+ENV PATH=/usr/local/bin:$PATH
+
+RUN rm -f /usr/bin/gmake && \
+    ln -s /usr/bin/make /usr/bin/gmake
+
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git-lfs && \
+    git lfs install --skip-repo
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-dev \
+        python3-pip \
+        python3-scipy \
+        python3-yaml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+# Mellanox OFED version 5.2-1.0.4.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gnupg \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - && \
+    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/5.2-1.0.4.0/ubuntu18.04/mellanox_mlnx_ofed.list && \
+    apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ibverbs-providers \
+        ibverbs-utils \
+        libibmad-dev \
+        libibmad5 \
+        libibumad-dev \
+        libibumad3 \
+        libibverbs-dev \
+        libibverbs1 \
+        librdmacm-dev \
+        librdmacm1 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Mellanox HPC-X version 2.8.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bzip2 \
+        openssh-client \
+        tar \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://www.mellanox.com/downloads/hpc/hpc-x/v2.8/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz -C /var/tmp -j && \
+    cp -a /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64 /usr/local/hpcx && \
+    echo "source /usr/local/hpcx/hpcx-mt-init-ompi.sh" >> /etc/bash.bashrc && \
+    echo "hpcx_load" >> /etc/bash.bashrc && \
+    rm -rf /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64
+
+# KNEM version 1.1.4
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        git && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && cd /var/tmp && git clone --depth=1 --branch knem-1.1.4 https://gitlab.inria.fr/knem/knem.git knem && cd - && \
+    mkdir -p /usr/local/knem && \
+    cd /var/tmp/knem && \
+    mkdir -p /usr/local/knem/include && \
+    cp common/*.h /usr/local/knem/include && \
+    rm -rf /var/tmp/knem
+ENV CPATH=/usr/local/knem/include:$CPATH
+
+# XPMEM branch master
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        autoconf \
+        automake \
+        ca-certificates \
+        file \
+        git \
+        libtool \
+        make && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && cd /var/tmp && git clone --depth=1 --branch master https://gitlab.com/hjelmn/xpmem.git xpmem && cd - && \
+    cd /var/tmp/xpmem && \
+    autoreconf --install && \
+    cd /var/tmp/xpmem &&   ./configure --prefix=/usr/local/xpmem --disable-kernel-module && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /var/tmp/xpmem
+ENV CPATH=/usr/local/xpmem/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/xpmem/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/xpmem/lib:$LIBRARY_PATH
+
+# UCX version 1.9.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        binutils-dev \
+        file \
+        libnuma-dev \
+        make \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp https://github.com/openucx/ucx/releases/download/v1.9.0/ucx-1.9.0.tar.gz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/ucx-1.9.0.tar.gz -C /var/tmp -z && \
+    cd /var/tmp/ucx-1.9.0 &&   ./configure --prefix=/usr/local/ucx --disable-assertions --disable-debug --disable-doxygen-doc --disable-logging --disable-params-check --enable-optimizations --with-knem --with-rdmacm --with-verbs --with-xpmem --without-cuda && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /var/tmp/ucx-1.9.0 /var/tmp/ucx-1.9.0.tar.gz
+ENV CPATH=/usr/local/ucx/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/ucx/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/ucx/lib:$LIBRARY_PATH \
+    PATH=/usr/local/ucx/bin:$PATH
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        default-libmysqlclient-dev \
+        file \
+        freeipmi-tools \
+        hwloc \
+        libevent-dev \
+        libfreeipmi-dev \
+        libglib2.0-0 \
+        libglib2.0-dev \
+        libgtk-3-0 \
+        libgtk-3-dev \
+        libhwloc-dev \
+        libjson-c-dev \
+        liblua5.2-0 \
+        liblua5.2-dev \
+        libmunge-dev \
+        libmunge2 \
+        libpam0g-dev \
+        libyaml-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
+
+RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB && \
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB && \
+    rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB && \
+    echo "deb https://apt.repos.intel.com/oneapi all main" > /etc/apt/sources.list.d/oneAPI.list
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 intel-hpckit-getting-started intel-oneapi-clck intel-oneapi-common-licensing intel-oneapi-common-vars intel-oneapi-dev-utilities intel-oneapi-dpcpp-cpp-compiler-pro intel-oneapi-ifort intel-oneapi-inspector intel-oneapi-itac intel-oneapi-mpi-devel intel-oneapi-mkl-devel && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN echo "if [ -z $INTEL_SH_GUARD ]; then" > /etc/profile.d/intel.sh && \
+    echo "    source /opt/intel/oneapi/setvars.sh -i_mpi_library_kind=release_mt" >> /etc/profile.d/intel.sh && \
+    echo "fi" >> /etc/profile.d/intel.sh && \
+    echo "export INTEL_SH_GUARD=1" >> /etc/profile.d/intel.sh && \
+    chmod a+x /etc/profile.d/intel.sh
+
+SHELL ["/bin/bash", "-c"]
+
+ENV BOOST_ROOT=/opt/jedistack \
+    CC=mpiicc \
+    CMAKE_CXX_COMPILER=mpiicpc \
+    CMAKE_C_COMPILER=mpiicc \
+    CMAKE_Fortran_COMPILER=mpiifort \
+    CMAKE_PREFIX_PATH=/opt/jedistack \
+    CMAKE_Platform=linux.intel \
+    CPATH=/opt/jedistack/include:/usr/local/include:/usr/include:/usr/local/pmix/include:$CPATH \
+    CXX=mpiicpc \
+    EIGEN3_INCLUDE_DIR=/opt/jedistack \
+    FC=mpiifort \
+    HDF5_ROOT=/opt/jedistack \
+    I_MPI_LIBRARY_KIND=release_mt \
+    I_MPI_THREAD_SPLIT=1 \
+    LD_LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin//usr/local/pmix/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH \
+    MPI_CC=mpiicc \
+    MPI_CXX=mpiicpc \
+    MPI_FC=mpiifort \
+    NETCDF=/opt/jedistack \
+    PATH=/opt/jedistack/bin:/usr/local/bin:/usr/local/pmix/bin:$PATH \
+    PIO=/opt/jedistack \
+    PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig \
+    PNETCDF=/opt/jedistack \
+    PYTHONPATH=/opt/jedistack/lib:/usr/local/lib:$PYTHONPATH \
+    SERIAL_CC=icc \
+    SERIAL_CXX=icpc \
+    SERIAL_FC=ifort
+
+RUN source /etc/profile && \
+    cd /root && \
+    git clone https://github.com/jcsda/jedi-stack.git && \
+    cd jedi-stack/buildscripts && \
+    git checkout develop && \
+    ./build_stack.sh "container-intel-impi-app" && \
+    mv ../jedi-stack-contents.log /etc && \
+    chmod a+r /etc/jedi-stack-contents.log && \
+    cd /root/jedi-stack/pkg/NCEPLIBS-bufr/build/python && \
+    python3 setup.py build && \
+    python3 setup.py install --prefix=/opt/jedistack --install-lib=/opt/jedistack/lib/python3.8/site-packages && \
+    rm -rf /root/jedi-stack && \
+    mkdir /worktmp
+
+COPY hello_world_mpi.c /root/hello_world_mpi.c
+
+RUN source /etc/profile && \
+    mkdir -p /opt/jedi && \
+    cd /opt/jedi && \
+    git clone https://github.com/jcsda/fv3-bundle.git && \
+    cd /opt/jedi/fv3-bundle && \
+    git checkout develop && \
+    git clone https://github.com/jcsda/crtm.git -b v2.3-jedi && \
+    mkdir -p /opt/jedi/build && \
+    cd /opt/jedi/build && \
+    ecbuild --build=Release ../fv3-bundle && \
+    make -j4 && \
+    ctest -R get_ && \
+    cd /opt/jedi/build/test_data && \
+    find . -type f -name "*.tar.gz" -delete && \
+    chmod -R 777 /opt/jedi/fv3-bundle && \
+    cd /root && \
+    mpiicc /root/hello_world_mpi.c -o /opt/jedistack/bin/hello_world_mpi -lstdc++
+
+RUN source /etc/profile && \
+    mkdir -p /var/tmp && \
+    wget -q -nc --no-check-certificate -P /var/tmp https://github.com/openpmix/openpmix/releases/download/v3.1.5/pmix-3.1.5.tar.gz && \
+    tar -x -f /var/tmp/pmix-3.1.5.tar.gz -C /var/tmp -z && \
+    cd /var/tmp/pmix-3.1.5 && \
+    ./configure --prefix=/opt/jedistack/pmix && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /var/tmp/pmix-3.1.5 /var/tmp/pmix-3.1.5.tar.gz
+
+RUN source /etc/profile && \
+    mkdir -p /var/tmp && \
+    wget -q -nc --no-check-certificate -P /var/tmp https://download.schedmd.com/slurm/slurm-19.05.4.tar.bz2 && \
+    tar -x -f /var/tmp/slurm-19.05.4.tar.bz2 -C /var/tmp -j && \
+    cd /var/tmp/slurm-19.05.4 && \
+    ./configure --prefix=/opt/jedistack/slurm-pmi2 --with-hdf5=/opt/jedistack/bin && \
+    cd /var/tmp/slurm-19.05.4 && \
+    make -C contribs/pmi2 install && \
+    rm -rf /var/tmp/slurm-19.05.4 /var/tmp/slurm-19.05.4.tar.bz2
+
+FROM ubuntu:20.04 AS runtime
+
+COPY --from=build /opt/jedistack /opt/jedi/jedistack
+
+COPY --from=build /opt/jedi /opt/jedi
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 build-essential pkg-config ca-certificates gnupg apt-utils && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        autoconf \
+        bc \
+        bison \
+        clang-tidy \
+        csh \
+        curl \
+        emacs \
+        file \
+        flex \
+        git \
+        ksh \
+        less \
+        libboost-thread-dev \
+        libcurl4-openssl-dev \
+        libexpat1-dev \
+        libgmp-dev \
+        libmpfr-dev \
+        libncurses-dev \
+        libssl-dev \
+        libx11-dev \
+        libxml2-dev \
+        lsb-release \
+        man-db \
+        nano \
+        openssh-server \
+        pkg-config \
+        screen \
+        swig \
+        tar \
+        tcl \
+        tcsh \
+        time \
+        tk \
+        unzip \
+        vim \
+        wget \
+        wish && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git-lfs && \
+    git lfs install --skip-repo
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-dev \
+        python3-pip \
+        python3-scipy \
+        python3-yaml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+# Mellanox OFED version 5.2-1.0.4.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        gnupg \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN wget -qO - https://www.mellanox.com/downloads/ofed/RPM-GPG-KEY-Mellanox | apt-key add - && \
+    mkdir -p /etc/apt/sources.list.d && wget -q -nc --no-check-certificate -P /etc/apt/sources.list.d https://linux.mellanox.com/public/repo/mlnx_ofed/5.2-1.0.4.0/ubuntu18.04/mellanox_mlnx_ofed.list && \
+    apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ibverbs-providers \
+        ibverbs-utils \
+        libibmad-dev \
+        libibmad5 \
+        libibumad-dev \
+        libibumad3 \
+        libibverbs-dev \
+        libibverbs1 \
+        librdmacm-dev \
+        librdmacm1 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Mellanox HPC-X version 2.8.0
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bzip2 \
+        openssh-client \
+        tar \
+        wget && \
+    rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://www.mellanox.com/downloads/hpc/hpc-x/v2.8/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz -C /var/tmp -j && \
+    cp -a /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64 /usr/local/hpcx && \
+    echo "source /usr/local/hpcx/hpcx-mt-init-ompi.sh" >> /etc/bash.bashrc && \
+    echo "hpcx_load" >> /etc/bash.bashrc && \
+    rm -rf /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64.tbz /var/tmp/hpcx-v2.8.0-gcc-MLNX_OFED_LINUX-5.2-1.0.4.0-ubuntu20.04-x86_64
+
+# KNEM
+COPY --from=0 /usr/local/knem /usr/local/knem
+ENV CPATH=/usr/local/knem/include:$CPATH
+
+# XPMEM
+COPY --from=0 /usr/local/xpmem /usr/local/xpmem
+ENV CPATH=/usr/local/xpmem/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/xpmem/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/xpmem/lib:$LIBRARY_PATH
+
+# UCX
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libbinutils && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=0 /usr/local/ucx /usr/local/ucx
+ENV CPATH=/usr/local/ucx/include:$CPATH \
+    LD_LIBRARY_PATH=/usr/local/ucx/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/usr/local/ucx/lib:$LIBRARY_PATH \
+    PATH=/usr/local/ucx/bin:$PATH
+
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
+
+RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB && \
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB && \
+    rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB && \
+    echo "deb https://apt.repos.intel.com/oneapi all main" > /etc/apt/sources.list.d/oneAPI.list
+
+SHELL ["/bin/bash", "-c"]
+
+RUN source /etc/profile && \
+    apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 kmod linux-headers-5.4.0-1041-aws libnuma-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o=Dpkg::Use-Pty=0 intel-oneapi-runtime-ccl intel-oneapi-runtime-compilers intel-oneapi-runtime-dnnl intel-oneapi-runtime-dpcpp-cpp intel-oneapi-runtime-dpcpp-library intel-oneapi-runtime-fortran intel-oneapi-runtime-libs intel-oneapi-runtime-mkl intel-oneapi-runtime-mpi intel-oneapi-runtime-opencl intel-oneapi-runtime-openmp intel-oneapi-runtime-tbb intel-oneapi-runtime-vpl intel-hpckit-runtime && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV BOOST_ROOT=/opt/jedistack \
+    CC=mpiicc \
+    CMAKE_CXX_COMPILER=mpiicpc \
+    CMAKE_C_COMPILER=mpiicc \
+    CMAKE_Fortran_COMPILER=mpiifort \
+    CMAKE_PREFIX_PATH=/opt/jedistack \
+    CMAKE_Platform=linux.intel \
+    CPATH=/opt/jedistack/include:/usr/local/include:/usr/include:/usr/local/pmix/include:$CPATH \
+    CXX=mpiicpc \
+    EIGEN3_INCLUDE_DIR=/opt/jedistack \
+    FC=mpiifort \
+    HDF5_ROOT=/opt/jedistack \
+    I_MPI_LIBRARY_KIND=release_mt \
+    I_MPI_THREAD_SPLIT=1 \
+    LD_LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin//usr/local/pmix/lib:$LD_LIBRARY_PATH \
+    LIBRARY_PATH=/opt/jedistack/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu:$LIBRARY_PATH \
+    MPI_CC=mpiicc \
+    MPI_CXX=mpiicpc \
+    MPI_FC=mpiifort \
+    NETCDF=/opt/jedistack \
+    PATH=/opt/jedistack/bin:/usr/local/bin:/usr/local/pmix/bin:$PATH \
+    PIO=/opt/jedistack \
+    PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig \
+    PNETCDF=/opt/jedistack \
+    PYTHONPATH=/opt/jedistack/lib:/usr/local/lib:$PYTHONPATH \
+    SERIAL_CC=icc \
+    SERIAL_CXX=icpc \
+    SERIAL_FC=ifort
+
+RUN echo "if [ -z $INTEL_SH_GUARD ]; then" > /etc/profile.d/intel.sh && \
+    echo "    source /opt/intel/oneapi/setvars.sh -i_mpi_library_kind=release_mt" >> /etc/profile.d/intel.sh && \
+    echo "fi" >> /etc/profile.d/intel.sh && \
+    echo "export INTEL_SH_GUARD=1" >> /etc/profile.d/intel.sh && \
+    chmod a+x /etc/profile.d/intel.sh

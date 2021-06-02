@@ -25,7 +25,7 @@ if [[ $# -lt 1 ]]; then
 fi
 
 CNAME=${1:-"gnu-openmpi-dev"}
-TAG=${2:-"beta"}
+TAG=${2:-"v1.x.x"}
 
 if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
 

@@ -118,10 +118,10 @@ if [[ $ans == y ]] ; then
 	    aws s3 mv s3://privatecontainers/jedi-${CNAME}.sif s3://privatecontainers/jedi-${CNAME}-revert.sif
       fi
       echo "Pushing to AWS S3 (private)"
-      aws s3 cp containers/jedi-${CNAME}_${TAG}.sif s3://privatecontainers/jedi-${CNAME}.tar.gz
+      aws s3 cp containers/jedi-${CNAME}_${TAG}.sif s3://privatecontainers/jedi-${CNAME}.sif
     else
       echo "Pushing to AWS S3 (private)"
-      aws s3 cp containers/jedi-${CNAME}_${TAG}.sif s3://privatecontainers/jedi-${CNAME}_${TAG}.tar.gz
+      aws s3 cp containers/jedi-${CNAME}_${TAG}.sif s3://privatecontainers/jedi-${CNAME}_${TAG}.sif
     fi
 
   else # push gnu and clang containers to sylabs cloud
