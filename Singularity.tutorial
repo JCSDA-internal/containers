@@ -24,7 +24,7 @@ SPECIES JEDI
     git config --global url.ssh://git@github.com/.insteadOf https://github.com/
     git lfs install --skip-repo
     cd /opt/jedi
-    git clone https://github.com/jcsda/fv3-bundle.git
+    git clone -b 1.1.1 https://github.com/jcsda/fv3-bundle.git
     cd fv3-bundle
     git clone https://github.com/JCSDA/jedi-cmake.git -b 1.1.0 --depth=1 
     git clone https://github.com/JCSDA/oops.git -b 1.1.0 --depth=1 
