@@ -152,7 +152,6 @@ Vagrant.configure("2") do |config|
     cd ./builddir
     make
     sudo make install
-    echo 'export PATH=/optjedi/bin:${PATH}' >> ${HOME}/.bashrc
 
   EOF
 
