@@ -21,10 +21,10 @@ SPECIES JEDI
     apt-get install -y --no-install-recommends mesa-utils libgl1-mesa-glx
     git config --global credential.helper 'cache --timeout=3600'
     git config --global --add credential.helper 'store'
-    git config --global url.ssh://git@github.com/.insteadOf https://github.com/
     git lfs install --skip-repo
+    mkdir -p /opt/jedi
     cd /opt/jedi
-    git clone https://github.com/jcsda/fv3-bundle.git
+    git clone https://github.com/JCSDA/fv3-bundle.git
     cd fv3-bundle
     git clone https://github.com/JCSDA/jedi-cmake.git -b 1.1.0 --depth=1 
     git clone https://github.com/JCSDA/oops.git -b 1.1.0 --depth=1 
@@ -41,6 +41,7 @@ SPECIES JEDI
     chmod a+rx /opt/jedi/fv3-bundle/ioda/src/engines/Examples/Python/*
     make -j4
     ctest -R get_
+    rm -f /opt/jedi/fv3-bundle/test-data-release/*.gz
     cd /opt/jedi
     git clone -b 1.1.0 --depth=1 https://github.com/jcsda-internal/fv3-jedi-tools
     cd fv3-jedi-tools
