@@ -17,8 +17,13 @@ SPECIES JEDI
 
 %post
     echo "Hello from inside the container"
+    apt-get update
+    apt-get install -y --no-install-recommends feh
+    apt-get install -y --no-install-recommends default-jre
+    apt-get install -y --no-install-recommends patchelf
     wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
     bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda3
+    patchelf --set-rpath '/usr/lib/x86_64-linux-gnu:$ORIGIN/../lib' /usr/local/miniconda3/bin/python
     export PATH=/usr/local/miniconda3/bin:$PATH
     conda install numpy
     conda install matplotlib
@@ -28,9 +33,6 @@ SPECIES JEDI
     conda install -c conda-forge netcdf4
     conda install -c conda-forge xarray
     conda install -c conda-forge cartopy
-    apt-get update
-    apt-get install -y --no-install-recommends feh
-    apt-get install -y --no-install-recommends default-jre
     rm -rf /var/lib/apt/lists/*
 
 %runscript
