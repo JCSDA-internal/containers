@@ -13,6 +13,7 @@ SPECIES JEDI
     export LANG=en_US.UTF-8
     export LANGUAGE=en_US:en
     export PATH=/usr/local/bin:/usr/local/miniconda3/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
+    export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:/usr/local/lib:/usr/local/miniconda3/lib:/usr/local/miniconda3/pkgs/python-3.9.5-h12debd9_4/lib:/usr/lib:/usr/local/ucx/lib:/usr/local/xpmem/lib:/.singularity.d/libs
     alias pip=/usr/local/miniconda3/bin/pip
 
 %post
