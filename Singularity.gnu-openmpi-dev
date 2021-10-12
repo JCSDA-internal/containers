@@ -14,6 +14,7 @@ SPECIES JEDI
     export LANGUAGE=en_US:en
     export PATH=/usr/local/bin:/usr/local/miniconda3/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
     export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:/usr/local/lib:/usr/local/miniconda3/lib:/usr/local/miniconda3/pkgs/python-3.9.5-h12debd9_4/lib:/usr/lib:/usr/local/ucx/lib:/usr/local/xpmem/lib:/.singularity.d/libs
+    export PYTHONPATH=/usr/local/lib/python3.9/site-packages
     alias pip=/usr/local/miniconda3/bin/pip
 
 %post
@@ -36,6 +37,17 @@ SPECIES JEDI
     conda install -c conda-forge cartopy
     conda install -c anaconda pyyaml
     rm -rf /var/lib/apt/lists/*
+
+%post
+   git clone https://github.com/noaa-emc/NCEPLIBS-bufr.git
+   cd NCEPLIBS-bufr
+   git fetch
+   git checkout --detach bufr_v11.5.0
+   mkdir build
+   cd build
+   cmake -DENABLE_PYTHON=ON -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib ..
+   make -j4
+   make install
 
 %runscript
     bash -l
