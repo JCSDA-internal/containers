@@ -17,6 +17,7 @@ SPECIES JEDI
 %post
     echo "Hello from inside the container"
     apt-get update
+    apt-get install -y --no-install-recommends sqlite3
     apt-get install -y --no-install-recommends libsqlite3-dev libtiff-dev
     apt-get install -y --no-install-recommends libgeos-dev libgeos++-dev
     apt-get install -y --no-install-recommends feh
@@ -37,9 +38,9 @@ SPECIES JEDI
     cmake ..
     cmake --build .
     cmake --build . --target install
-    rm -rf /root/proj-*
     python3 -m pip install -U pyproj
     python3 -m pip install -U cartopy
+    rm -rf /root/proj-*
     rm -rf /var/lib/apt/lists/*
 
 %runscript
