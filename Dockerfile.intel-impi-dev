@@ -152,4 +152,5 @@ RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /etc/bash.bashrc && \
     echo 'export CC=mpiicc' >> /etc/bash.bashrc && \
     echo 'export CXX=mpiicpc' >> /etc/bash.bashrc
 
+VOLUME /var/lib/docker
 CMD ["/bin/bash" , "-l"]
