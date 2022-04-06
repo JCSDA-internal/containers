@@ -33,7 +33,7 @@ export USE_SUDO=${USE_SUDO:-"y"}
 
 export CNAME=${1:-"gnu-openmpi-dev"}
 export TAG=${2:-"beta"}
-KEY=$HOME/.ssh/github_academy_rsa
+KEY=$HOME/.ssh/id_rsa
 
 if [[ $(echo ${CNAME} | cut -d- -f1) =~ "intel" ]]; then
 

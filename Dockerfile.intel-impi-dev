@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 FROM jcsda/docker_base-intel-impi-dev:latest
-LABEL maintainer "Mark Miesch <miesch@ucar.edu>"
+LABEL maintainer "Maryam Abdi-Oskouei <maryamao@ucar.edu>"
 
 #-------------------------------------------------------------
 # From Intel's os-tools-ubuntu20 Dockerfile
@@ -107,7 +107,7 @@ RUN git config --global url.ssh://git@github.com/.insteadOf https://github.com/
 # build the jedi stack
 RUN --mount=type=ssh,id=github_ssh_key cd /root \
     && source /etc/profile \
-    && git clone git@github.com:jcsda-internal/jedi-stack.git \
+    && git clone https://github.com/JCSDA-internal/jedi-stack.git \
     && cd jedi-stack/buildscripts \
     && git checkout develop \
     && ./build_stack.sh "container-intel-impi-dev" \
@@ -115,9 +115,14 @@ RUN --mount=type=ssh,id=github_ssh_key cd /root \
     && chmod a+r /etc/jedi-stack-contents.log \
     && cd /root/jedi-stack/pkg/NCEPLIBS-bufr/build/python \
     && python setup.py build \
-    && python setup.py install --prefix=/usr/local --install-lib=/usr/local/lib/python3.8/site-packages \
+    && python setup.py install --prefix=/usr/local --install-lib=/usr/local/lib/python3.8/dist-packages \
     && rm -rf /root/jedi-stack \
     && mkdir /worktmp
+
+# build python packages for ioda converters
+RUN . /etc/profile.d/intel.sh  \
+    && pip install eccodes \
+    && CC="mpiicc" HDF5_MPI="ON" HDF5_DIR=/usr/local pip install --no-binary=h5py h5py
 
 # clean up
 RUN . /etc/profile \
@@ -129,7 +134,7 @@ RUN useradd -U -k /etc/skel -s /bin/bash -d /home/jedi -m jedi --uid 43891 && \
     echo "export FC=mpiifort" >> ~jedi/.bashrc && \
     echo "export CC=mpiicc" >> ~jedi/.bashrc && \
     echo "export CXX=mpiicpc" >> ~jedi/.bashrc && \
-    echo "export PYTHONPATH=/usr/local/lib/python3.8/site-packages:/usr/local/lib:$PYTHONPATH" >> ~jedi/.bashrc && \
+    echo "export PYTHONPATH=/usr/local/lib/python3.8/site-packages:/usr/local/lib/python3.8/dist-packages:/usr/local/lib:$PYTHONPATH" >> ~jedi/.bashrc && \
     echo "ulimit -s unlimited" >> ~jedi/.bashrc && \
     echo "ulimit -v unlimited" >> ~jedi/.bashrc && \
     echo -e "[credential]\n    helper = cache --timeout=7200" >> ~jedi/.gitconfig && \
@@ -147,9 +152,10 @@ RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /etc/bash.bashrc && \
     echo 'export PIO=/usr/local' >> /etc/bash.bashrc && \
     echo 'export BOOST_ROOT=/usr/local' >> /etc/bash.bashrc && \
     echo 'export EIGEN3_INCLUDE_DIR=/usr/local' >> /etc/bash.bashrc && \
-    echo 'export PYTHONPATH=/usr/local/lib:/usr/local/lib/python3.8/site-packages:$PYTHONPATH' >> /etc/bash.bashrc && \
+    echo 'export PYTHONPATH=/usr/local/lib:/usr/local/lib/python3.8/site-packages:/usr/local/lib/python3.8/dist-packages:$PYTHONPATH' >> /etc/bash.bashrc && \
     echo 'export FC=mpiifort' >> /etc/bash.bashrc && \
     echo 'export CC=mpiicc' >> /etc/bash.bashrc && \
     echo 'export CXX=mpiicpc' >> /etc/bash.bashrc
 
+VOLUME /var/lib/docker
 CMD ["/bin/bash" , "-l"]
